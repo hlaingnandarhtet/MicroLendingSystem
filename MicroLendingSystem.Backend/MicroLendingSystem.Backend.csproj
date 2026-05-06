@@ -10,6 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="..\microlending-database\MicroLendingSystem.Database.csproj" />
     <ProjectReference Include="..\microlending-shared\MicroLendingSystem.Shared.csproj" />
+    <ProjectReference Include="..\MicroLendingSystem.Database\MicroLendingSystem.Database.csproj" />
   </ItemGroup>
 
   <ItemGroup>
