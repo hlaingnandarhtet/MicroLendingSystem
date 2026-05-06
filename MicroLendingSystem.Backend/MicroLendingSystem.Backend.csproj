@@ -11,6 +11,7 @@
     <ProjectReference Include="..\microlending-database\MicroLendingSystem.Database.csproj" />
     <ProjectReference Include="..\microlending-shared\MicroLendingSystem.Shared.csproj" />
     <ProjectReference Include="..\MicroLendingSystem.Database\MicroLendingSystem.Database.csproj" />
+    <ProjectReference Include="..\MicroLendingSystem.Shared\MicroLendingSystem.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

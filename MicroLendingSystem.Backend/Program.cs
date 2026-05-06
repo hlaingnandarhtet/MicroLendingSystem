@@ -1,3 +1,4 @@
+using microlending_API.Features.Borrowers;
 using MicroLendingSystem.Database.AppDbContext;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<IBorrowerService, BorrowerService>();
 
 var app = builder.Build();
 
