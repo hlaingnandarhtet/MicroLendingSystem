@@ -1,0 +1,6 @@
+@microlending_API_HostAddress = http://localhost:5125
+
+GET {{microlending_API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

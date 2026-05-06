@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37216.2
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroLendingSystem.Backend", "MicroLendingSystem.Backend.csproj", "{9DEFAF53-CCBB-4738-A48D-C85C1960BA94}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroLendingSystem.Frontend", "..\microlending-MVC\MicroLendingSystem.Frontend.csproj", "{1A9F3124-2939-4100-B712-7955774807E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroLendingSystem.Shared", "..\microlending-shared\MicroLendingSystem.Shared.csproj", "{C58C8A99-37F2-4DD0-9F64-9445E4ED13AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroLendingSystem.Database", "..\microlending-database\MicroLendingSystem.Database.csproj", "{7EE882FD-2E90-49C8-8565-1D6015C11489}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9DEFAF53-CCBB-4738-A48D-C85C1960BA94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DEFAF53-CCBB-4738-A48D-C85C1960BA94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DEFAF53-CCBB-4738-A48D-C85C1960BA94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DEFAF53-CCBB-4738-A48D-C85C1960BA94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A9F3124-2939-4100-B712-7955774807E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A9F3124-2939-4100-B712-7955774807E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A9F3124-2939-4100-B712-7955774807E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A9F3124-2939-4100-B712-7955774807E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C58C8A99-37F2-4DD0-9F64-9445E4ED13AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C58C8A99-37F2-4DD0-9F64-9445E4ED13AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C58C8A99-37F2-4DD0-9F64-9445E4ED13AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C58C8A99-37F2-4DD0-9F64-9445E4ED13AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7EE882FD-2E90-49C8-8565-1D6015C11489}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EE882FD-2E90-49C8-8565-1D6015C11489}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EE882FD-2E90-49C8-8565-1D6015C11489}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EE882FD-2E90-49C8-8565-1D6015C11489}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2ED0F184-192A-4119-8A83-6CC8057735B8}
+	EndGlobalSection
+EndGlobal
