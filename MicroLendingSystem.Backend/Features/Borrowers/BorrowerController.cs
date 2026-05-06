@@ -22,7 +22,7 @@ public class BorrowerController : ControllerBase
         return Ok(await _service.GetBorrowersAsync(page, pageSize, ct));
     }
 
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:int}/details")]
     public async Task<ActionResult<Borrower>> GetBorrowersById(int id, CancellationToken ct = default)
     {
         var result = await _service.GetByIdAsync(id, ct);

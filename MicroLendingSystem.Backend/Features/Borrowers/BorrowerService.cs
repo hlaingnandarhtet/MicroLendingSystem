@@ -32,13 +32,13 @@ public class BorrowerService : IBorrowerService
         };
     }
 
-    public async Task<Borrower?> GetByIdAsync(int id, CancellationToken ct)
+    public async Task<Borrower?> GetBorrowersByIdAsync(int id, CancellationToken ct)
     {
         return await _context.Borrowers.AsNoTracking()
             .FirstOrDefaultAsync(b => b.Id == id && b.IsDeleted != true, ct);
     }
 
-    public async Task<Borrower> CreateAsync(Borrower model, CancellationToken ct)
+    public async Task<Borrower> CreateBorrowersAsync(Borrower model, CancellationToken ct)
     {
         var now = DateTime.UtcNow;
         model.CreatedAt = now;
@@ -50,7 +50,7 @@ public class BorrowerService : IBorrowerService
         return model;
     }
 
-    public async Task<Borrower?> UpdateAsync(int id, Borrower model, CancellationToken ct)
+    public async Task<Borrower?> UpdateBorrowersAsync(int id, Borrower model, CancellationToken ct)
     {
         var entity = await _context.Borrowers
             .FirstOrDefaultAsync(b => b.Id == id && b.IsDeleted != true, ct);
@@ -69,7 +69,7 @@ public class BorrowerService : IBorrowerService
         return entity;
     }
 
-    public async Task<bool> DeleteAsync(int id, CancellationToken ct)
+    public async Task<bool> DeleteBorrowersAsync(int id, CancellationToken ct)
     {
         var entity = await _context.Borrowers
             .FirstOrDefaultAsync(b => b.Id == id && b.IsDeleted != true, ct);
@@ -82,5 +82,25 @@ public class BorrowerService : IBorrowerService
 
         await _context.SaveChangesAsync(ct);
         return true;
+    }
+
+    public Task<Borrower?> GetByIdAsync(int id, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Borrower> CreateAsync(Borrower borrower, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Borrower?> UpdateAsync(int id, Borrower borrower, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<bool> DeleteAsync(int id, CancellationToken ct)
+    {
+        throw new NotImplementedException();
     }
 }

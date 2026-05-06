@@ -20,6 +20,8 @@ public partial class Loan
 
     public string? Status { get; set; }
 
+    public DateTime? CreatedAt { get; set; }
+
     public DateTime? UpdatedAt { get; set; }
 
     public DateTime? DeletedAt { get; set; }
