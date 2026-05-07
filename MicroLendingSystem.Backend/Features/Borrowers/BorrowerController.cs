@@ -1,61 +1,48 @@
-﻿using Microlending.Shared.Models;
-using MicroLendingSystem.Database.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace microlending_API.Features.Borrowers;
 
 [ApiController]
-[Route("api/systems/borrowers")]
+[Route("api/borrowers")]
 public class BorrowerController : ControllerBase
 {
     private readonly IBorrowerService _service;
 
-    public BorrowerController(IBorrowerService service)
-    {
-        _service = service;
-    }
+    public BorrowerController(IBorrowerService service) => _service = service;
 
     [HttpGet]
-    public async Task<ActionResult<BorrowersPagedResponse>> GetBorrowers([FromQuery] int page = 1, [FromQuery] int pageSize = 10, CancellationToken ct = default)
+    public async Task<IActionResult> GetBorrowers([FromQuery] int page = 1, [FromQuery] int pageSize = 10, CancellationToken ct = default)
     {
-        if (page < 1 || pageSize < 1) return BadRequest("Invalid pagination parameters.");
-        return Ok(await _service.GetBorrowersAsync(page, pageSize, ct));
+        var result = await _service.GetBorrowersAsync(page, pageSize, ct);
+        return result.IsSuccess ? Ok(result.Data) : StatusCode(result.StatusCode, result.Error);
     }
 
     [HttpGet("{id:int}/details")]
-    public async Task<ActionResult<Borrower>> GetBorrowersById(int id, CancellationToken ct = default)
+    public async Task<IActionResult> GetBorrowersById(int id, CancellationToken ct = default)
     {
         var result = await _service.GetByIdAsync(id, ct);
-        return result is null ? NotFound() : Ok(result);
+        return result.IsSuccess ? Ok(result.Data) : StatusCode(result.StatusCode, result.Error);
     }
 
     [HttpPost("create")]
-    public async Task<ActionResult<Borrower>> BorrowersCreate([FromBody] Borrower model, CancellationToken ct = default)
+    public async Task<IActionResult> BorrowersCreate([FromBody] CreateBorrowerRequest request, CancellationToken ct = default)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
-        var entity = await _service.CreateAsync(model, ct);
-        return CreatedAtAction(nameof(GetBorrowersById), new { id = entity.Id }, entity);
+        var result = await _service.CreateAsync(request, ct);
+        return result.IsSuccess ? Ok(result.Data) : StatusCode(result.StatusCode, result.Error);
     }
 
     [HttpPut("{id}/update")]
-    public async Task<IActionResult> BorrowersUpdate(int id, [FromBody] Borrower model, CancellationToken ct = default)
+    public async Task<IActionResult> BorrowersUpdate(int id, [FromBody] UpdateBorrowerRequest request, CancellationToken ct = default)
     {
-        if (id != model.Id) return BadRequest("ID mismatch");
-
-        var result = await _service.UpdateAsync(id, model, ct);
-        return result is not null ? NoContent() : NotFound();
+        var result = await _service.UpdateAsync(id, request, ct);
+        return result.IsSuccess ? Ok(result.Data) : StatusCode(result.StatusCode, result.Error);
     }
 
     [HttpDelete("{id:int}/delete")]
     public async Task<IActionResult> BorrowersDelete(int id, CancellationToken ct = default)
     {
-        var success = await _service.DeleteAsync(id, ct);
-        return success ? NoContent() : NotFound();
+        var result = await _service.DeleteAsync(id, ct);
+        return result.IsSuccess ? Ok(result.Data) : StatusCode(result.StatusCode, result.Error);
     }
-}
-
-public class BorrowersPagedResponse
-{
-    public IReadOnlyList<Borrower> Items { get; set; } = Array.Empty<Borrower>();
-    public PaginationMetadata Pagination { get; set; } = null!;
 }

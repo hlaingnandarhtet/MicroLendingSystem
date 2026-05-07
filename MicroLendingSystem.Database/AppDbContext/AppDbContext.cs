@@ -22,12 +22,14 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Loan> Loans { get; set; }
 
-    public virtual DbSet<Repayment> Repayments { get; set; }
+    public virtual DbSet<LoanSetting> LoanSettings { get; set; }
+
+    public virtual DbSet<Transaction> Transactions { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+//To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Server=.;Database=MicroLoanDB;Trusted_Connection=True;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -86,6 +88,41 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("FK__Borrowers__Docum__534D60F1");
         });
 
+        modelBuilder.Entity<LoanSetting>(entity =>
+        {
+            entity.ToTable("LoanSettings");
+
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.PlanName).HasMaxLength(150);
+            entity.Property(e => e.InterestRate).HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getutcdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+        });
+
+        modelBuilder.Entity<Transaction>(entity =>
+        {
+            entity.ToTable("Transactions");
+
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.TransactionDate).HasColumnType("datetime");
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getutcdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+
+            entity.HasOne(d => d.Loan).WithMany(p => p.Transactions)
+                .HasForeignKey(d => d.LoanId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
         modelBuilder.Entity<Loan>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Loans__3214EC0771AC5E38");
@@ -99,29 +136,17 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.LoanCode).HasMaxLength(50);
             entity.Property(e => e.Status).HasMaxLength(20);
             entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+            entity.Property(e => e.TotalRepayableAmount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.RemainingBalance).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.Borrower).WithMany()
                 .HasForeignKey(d => d.BorrowerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Loans__BorrowerI__5812160E");
-        });
 
-        modelBuilder.Entity<Repayment>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__Repaymen__3214EC07CD781B6D");
-
-            entity.Property(e => e.AmountPaid).HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.DeletedAt).HasColumnType("datetime");
-            entity.Property(e => e.InterestPaid).HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
-            entity.Property(e => e.RemainingBalance).HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.Status).HasMaxLength(20);
-            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
-
-            entity.HasOne(d => d.Loan).WithMany(p => p.Repayments)
-                .HasForeignKey(d => d.LoanId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Repayment__LoanI__5BE2A6F2");
+            entity.HasOne(d => d.LoanSetting).WithMany(p => p.Loans)
+                .HasForeignKey(d => d.LoanSettingId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<User>(entity =>

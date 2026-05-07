@@ -6,6 +6,8 @@ public partial class Loan
 
     public int BorrowerId { get; set; }
 
+    public int? LoanSettingId { get; set; }
+
     public string LoanCode { get; set; } = null!;
 
     public decimal LoanAmount { get; set; }
@@ -13,6 +15,13 @@ public partial class Loan
     public decimal InterestRate { get; set; }
 
     public int LoanTerm { get; set; }
+
+    /// <summary>1 = Monthly, 2 = Daily (snapshot from loan setting at creation).</summary>
+    public int? CalculationType { get; set; }
+
+    public decimal? TotalRepayableAmount { get; set; }
+
+    public decimal? RemainingBalance { get; set; }
 
     public DateOnly? StartDate { get; set; }
 
@@ -30,5 +39,7 @@ public partial class Loan
 
     public virtual Borrower Borrower { get; set; } = null!;
 
-    public virtual ICollection<Repayment> Repayments { get; set; } = new List<Repayment>();
+    public virtual LoanSetting LoanSetting { get; set; } = null!;
+
+    public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }

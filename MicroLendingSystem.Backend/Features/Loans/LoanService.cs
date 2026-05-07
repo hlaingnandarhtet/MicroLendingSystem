@@ -2,13 +2,16 @@
 using MicroLendingSystem.Database.AppDbContext;
 using MicroLendingSystem.Database.Models;
 using MicroLendingSystem.Shared.Models;
-using microlending_API.Features.Loans.Constants;
-using microlending_API.Features.Loans.Models;
+using microlending_API.Features.Borrowers;
+using microlending_API.Features.LoanSettings;
 
 namespace microlending_API.Features.Loans;
 
 public class LoanService : ILoanService
 {
+    private const int DisbursementTransactionType = 1;
+    private const int RepaymentTransactionType = 2;
+
     private readonly AppDbContext _context;
 
     public LoanService(AppDbContext context) => _context = context;
@@ -21,16 +24,32 @@ public class LoanService : ILoanService
             return Result<LoanDto>.Failure($"Borrower with ID {request.BorrowerId} was not found.", 400);
         }
 
+        var setting = await _context.LoanSettings
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == request.LoanSettingId && s.IsDeleted != true, ct);
+
+        if (setting is null)
+        {
+            return Result<LoanDto>.Failure($"Loan setting with ID {request.LoanSettingId} was not found.", 400);
+        }
+
+        if (!Enum.IsDefined(typeof(CalculationType), setting.CalculationType))
+        {
+            return Result<LoanDto>.Failure("The selected loan setting has an invalid calculation type.", 400);
+        }
+
         var datePart = DateTime.UtcNow.ToString("yyyyMM");
         var count = await _context.Loans.CountAsync(ct) + 1;
 
         var loan = new Loan
         {
             BorrowerId = request.BorrowerId,
+            LoanSettingId = setting.Id,
             LoanCode = $"LN-{datePart}-{count:D3}",
             LoanAmount = request.LoanAmount,
-            InterestRate = request.InterestRate,
-            LoanTerm = request.LoanTerm,
+            InterestRate = setting.InterestRate,
+            LoanTerm = setting.LoanTerm,
+            CalculationType = setting.CalculationType,
             Status = (int)LoanStatus.Pending,
             CreatedAt = DateTime.UtcNow,
             IsDeleted = false
@@ -42,6 +61,7 @@ public class LoanService : ILoanService
         var created = await _context.Loans
             .AsNoTracking()
             .Include(l => l.Borrower)
+            .Include(l => l.LoanSetting)
             .FirstAsync(l => l.Id == loan.Id, ct);
 
         return Result<LoanDto>.Success(MapToLoanDto(created));
@@ -57,13 +77,56 @@ public class LoanService : ILoanService
 
         if (statusId == (int)LoanStatus.Active)
         {
+            if (loan.Status == (int)LoanStatus.Active)
+            {
+                return Result<bool>.Failure("Loan is already active.", 400);
+            }
+
+            if (loan.Status != (int)LoanStatus.Pending)
+            {
+                return Result<bool>.Failure("Only pending loans can be approved.", 400);
+            }
+
+            if (!Enum.IsDefined(typeof(CalculationType), loan.CalculationType))
+            {
+                return Result<bool>.Failure("Loan has an invalid calculation type.", 400);
+            }
+
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var calcType = (CalculationType)loan.CalculationType;
+            var totalRepayable = CalculateInterest(loan.LoanAmount, loan.InterestRate, loan.LoanTerm, calcType);
+
             loan.Status = (int)LoanStatus.Active;
             loan.StartDate = today;
             loan.EndDate = today.AddMonths(loan.LoanTerm);
+            loan.TotalRepayableAmount = totalRepayable;
+            loan.RemainingBalance = await GetRemainingBalanceAsync(loan.Id, loan.LoanAmount, ct);
+
+            var alreadyDisbursed = await _context.Transactions.AnyAsync(
+                t => t.LoanId == loan.Id && t.IsDeleted != true && t.TransactionType == DisbursementTransactionType,
+                ct);
+
+            if (!alreadyDisbursed)
+            {
+                _context.Transactions.Add(new Transaction
+                {
+                    LoanId = loan.Id,
+                    TransactionType = DisbursementTransactionType,
+                    Amount = loan.LoanAmount,
+                    TransactionDate = DateTime.UtcNow,
+                    Description = "Loan disbursement on approval.",
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                });
+            }
         }
         else if (statusId == (int)LoanStatus.Rejected)
         {
+            if (loan.Status != (int)LoanStatus.Pending)
+            {
+                return Result<bool>.Failure("Only pending loans can be rejected.", 400);
+            }
+
             loan.Status = (int)LoanStatus.Rejected;
         }
         else
@@ -78,6 +141,11 @@ public class LoanService : ILoanService
 
     public async Task<PagedResult<PagedPayload<LoanDto>>> GetLoanAsync(GetLoansRequest request, CancellationToken ct)
     {
+        if (request.Page < 1 || request.PageSize < 1)
+        {
+            return PagedResult<PagedPayload<LoanDto>>.Failure("Invalid pagination parameters.", 400);
+        }
+
         var query = _context.Loans.AsNoTracking().Where(l => l.IsDeleted != true);
 
         if (request.Status.HasValue)
@@ -91,36 +159,15 @@ public class LoanService : ILoanService
         }
 
         var total = await query.CountAsync(ct);
-        var items = await query
+        var entities = await query
+            .Include(l => l.Borrower)
+            .Include(l => l.LoanSetting)
             .OrderByDescending(l => l.CreatedAt)
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
-            .Select(l => new LoanDto
-            {
-                Id = l.Id,
-                LoanCode = l.LoanCode,
-                BorrowerId = l.BorrowerId,
-                LoanAmount = l.LoanAmount,
-                InterestRate = l.InterestRate,
-                LoanTerm = l.LoanTerm,
-                Status = l.Status ?? (int)LoanStatus.Pending,
-                StartDate = l.StartDate,
-                EndDate = l.EndDate,
-                CreatedAt = l.CreatedAt,
-                UpdatedAt = l.UpdatedAt,
-                Borrower = l.Borrower == null
-                    ? null
-                    : new BorrowerDto
-                    {
-                        Id = l.Borrower.Id,
-                        FullName = l.Borrower.FullName,
-                        UserName = l.Borrower.UserName,
-                        Nrcno = l.Borrower.Nrcno,
-                        PhoneNo = l.Borrower.PhoneNo,
-                        Address = l.Borrower.Address
-                    }
-            })
             .ToListAsync(ct);
+
+        var items = entities.Select(MapToLoanDto).ToList();
 
         var payload = new PagedPayload<LoanDto>
         {
@@ -135,45 +182,21 @@ public class LoanService : ILoanService
 
     public async Task<Result<LoanDto>> GetLoanByIdAsync(int id, CancellationToken ct)
     {
-        var dto = await _context.Loans
+        var loan = await _context.Loans
             .AsNoTracking()
-            .Where(l => l.Id == id && l.IsDeleted != true)
-            .Select(l => new LoanDto
-            {
-                Id = l.Id,
-                LoanCode = l.LoanCode,
-                BorrowerId = l.BorrowerId,
-                LoanAmount = l.LoanAmount,
-                InterestRate = l.InterestRate,
-                LoanTerm = l.LoanTerm,
-                Status = l.Status ?? (int)LoanStatus.Pending,
-                StartDate = l.StartDate,
-                EndDate = l.EndDate,
-                CreatedAt = l.CreatedAt,
-                UpdatedAt = l.UpdatedAt,
-                Borrower = l.Borrower == null
-                    ? null
-                    : new BorrowerDto
-                    {
-                        Id = l.Borrower.Id,
-                        FullName = l.Borrower.FullName,
-                        UserName = l.Borrower.UserName,
-                        Nrcno = l.Borrower.Nrcno,
-                        PhoneNo = l.Borrower.PhoneNo,
-                        Address = l.Borrower.Address
-                    }
-            })
-            .FirstOrDefaultAsync(ct);
+            .Include(l => l.Borrower)
+            .Include(l => l.LoanSetting)
+            .FirstOrDefaultAsync(l => l.Id == id && l.IsDeleted != true, ct);
 
-        if (dto is null)
+        if (loan is null)
         {
             return Result<LoanDto>.Failure("Loan not found.", 404);
         }
 
-        return Result<LoanDto>.Success(dto);
+        return Result<LoanDto>.Success(MapToLoanDto(loan));
     }
 
-    public async Task<Result<bool>> UpdateLoanStatusAsync(int id, UpdateLoanStatusRequest request, CancellationToken ct)
+    public async Task<Result<LoanDto>> UpdateLoanStatusAsync(int id, UpdateLoanStatusRequest request, CancellationToken ct)
     {
         if (!Enum.IsDefined(typeof(LoanStatus), request.StatusId))
         {
@@ -202,6 +225,7 @@ public class LoanService : ILoanService
 
         loan.IsDeleted = true;
         loan.UpdatedAt = DateTime.UtcNow;
+        loan.DeletedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync(ct);
         return Result<bool>.Success(true);
     }
@@ -220,9 +244,24 @@ public class LoanService : ILoanService
             return Result<LoanDto>.Failure("Cannot update loan data because it is not pending.", 400);
         }
 
+        var setting = await _context.LoanSettings
+            .FirstOrDefaultAsync(s => s.Id == request.LoanSettingId && s.IsDeleted != true, ct);
+
+        if (setting is null)
+        {
+            return Result<LoanDto>.Failure($"Loan setting with ID {request.LoanSettingId} was not found.", 400);
+        }
+
+        if (!Enum.IsDefined(typeof(CalculationType), setting.CalculationType))
+        {
+            return Result<LoanDto>.Failure("The selected loan setting has an invalid calculation type.", 400);
+        }
+
         loan.LoanAmount = request.LoanAmount;
-        loan.InterestRate = request.InterestRate;
-        loan.LoanTerm = request.LoanTerm;
+        loan.LoanSettingId = setting.Id;
+        loan.InterestRate = setting.InterestRate;
+        loan.LoanTerm = setting.LoanTerm;
+        loan.CalculationType = setting.CalculationType;
         loan.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync(ct);
@@ -230,9 +269,42 @@ public class LoanService : ILoanService
         var updated = await _context.Loans
             .AsNoTracking()
             .Include(l => l.Borrower)
+            .Include(l => l.LoanSetting)
             .FirstAsync(l => l.Id == id, ct);
 
         return Result<LoanDto>.Success(MapToLoanDto(updated));
+    }
+
+    /// Total repayable (principal + interest). <paramref name="rate"/> is annual nominal %; <paramref name="term"/> is months.
+    /// Monthly: P×(R/100/12)×T interest. Daily: P×(R/100/365)×(T×30) interest (30-day month approximation).
+
+    private static decimal CalculateInterest(decimal principal, decimal rate, int term, CalculationType type)
+    {
+        if (principal <= 0 || term <= 0)
+        {
+            return decimal.Round(principal, 2, MidpointRounding.AwayFromZero);
+        }
+
+        var interest = type switch
+        {
+            CalculationType.Monthly => principal * (rate / 100m / 12m) * term,  
+            CalculationType.Daily => principal * (rate / 100m / 365m) * (term * 30m),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+
+        var total = principal + interest;
+        return decimal.Round(total, 2, MidpointRounding.AwayFromZero);
+    }
+
+    private async Task<decimal> GetRemainingBalanceAsync(int loanId, decimal loanAmount, CancellationToken ct)
+    {
+        var totalRepayments = await _context.Transactions
+            .AsNoTracking()
+            .Where(t => t.LoanId == loanId && t.IsDeleted != true && t.TransactionType == RepaymentTransactionType)
+            .SumAsync(t => (decimal?)t.Amount, ct) ?? 0m;
+
+        var remaining = loanAmount - totalRepayments;
+        return decimal.Round(Math.Max(remaining, 0m), 2, MidpointRounding.AwayFromZero);
     }
 
     private static LoanDto MapToLoanDto(Loan loan) =>
@@ -241,9 +313,14 @@ public class LoanService : ILoanService
             Id = loan.Id,
             LoanCode = loan.LoanCode,
             BorrowerId = loan.BorrowerId,
+            LoanSettingId = loan.LoanSettingId,
+            PlanName = loan.LoanSetting?.PlanName ?? string.Empty,
             LoanAmount = loan.LoanAmount,
             InterestRate = loan.InterestRate,
             LoanTerm = loan.LoanTerm,
+            CalculationType = loan.CalculationType,
+            TotalRepayableAmount = loan.TotalRepayableAmount,
+            RemainingBalance = loan.RemainingBalance,
             Status = loan.Status ?? (int)LoanStatus.Pending,
             StartDate = loan.StartDate,
             EndDate = loan.EndDate,
@@ -258,7 +335,10 @@ public class LoanService : ILoanService
                     UserName = loan.Borrower.UserName,
                     Nrcno = loan.Borrower.Nrcno,
                     PhoneNo = loan.Borrower.PhoneNo,
-                    Address = loan.Borrower.Address
+                    Address = loan.Borrower.Address,
+                    DocumentId = loan.Borrower.DocumentId ?? 0,
+                    CreatedAt = loan.Borrower.CreatedAt,
+                    UpdatedAt = loan.Borrower.UpdatedAt
                 }
         };
 }

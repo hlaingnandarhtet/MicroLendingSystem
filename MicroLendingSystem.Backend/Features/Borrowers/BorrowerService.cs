@@ -1,106 +1,126 @@
-﻿using Microlending.Shared.Models;
+﻿using MicroLendingSystem.Database.AppDbContext;
 using MicroLendingSystem.Database.Models;
-using MicroLendingSystem.Database.AppDbContext;
+using MicroLendingSystem.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace microlending_API.Features.Borrowers;
 
-// Database access done here, we will implement the IBorrowerService interface in this class.
 public class BorrowerService : IBorrowerService
 {
     private readonly AppDbContext _context;
 
-    // We inject the AppDbContext into the service to perform database operations.
-    public BorrowerService(AppDbContext context)
-    {
-        _context = context;
-    }
+    public BorrowerService(AppDbContext context) => _context = context;
 
-    public async Task<BorrowersPagedResponse> GetBorrowersAsync(int page, int pageSize, CancellationToken cancellationToken)
+    public async Task<PagedResult<PagedPayload<BorrowerDto>>> GetBorrowersAsync(int page, int pageSize, CancellationToken cancellationToken)
     {
+        if (page < 1 || pageSize < 1)
+        {
+            return PagedResult<PagedPayload<BorrowerDto>>.Failure("Invalid pagination parameters.", 400);
+        }
+
         var query = _context.Borrowers.AsNoTracking().Where(b => b.IsDeleted != true);
         var total = await query.CountAsync(cancellationToken);
-        var items = await query.OrderBy(b => b.FullName)
-                               .Skip((page - 1) * pageSize)
-                               .Take(pageSize)
-                               .ToListAsync(cancellationToken);
+        var entities = await query.OrderBy(b => b.FullName)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
 
-        return new BorrowersPagedResponse
+        var payload = new PagedPayload<BorrowerDto>
         {
-            Items = items,
-            Pagination = new PaginationMetadata { TotalCount = total, PageSize = pageSize, CurrentPage = page }
+            Items = entities.Select(MapToDto).ToList(),
+            TotalCount = total,
+            CurrentPage = page,
+            PageSize = pageSize
         };
+
+        return PagedResult<PagedPayload<BorrowerDto>>.Success(payload);
     }
 
-    public async Task<Borrower?> GetBorrowersByIdAsync(int id, CancellationToken ct)
+    public async Task<Result<BorrowerDto>> GetByIdAsync(int id, CancellationToken ct)
     {
-        return await _context.Borrowers.AsNoTracking()
+        var entity = await _context.Borrowers.AsNoTracking()
             .FirstOrDefaultAsync(b => b.Id == id && b.IsDeleted != true, ct);
+
+        return entity is null
+            ? Result<BorrowerDto>.Failure("Borrower not found.", 404)
+            : Result<BorrowerDto>.Success(MapToDto(entity));
     }
 
-    public async Task<Borrower> CreateBorrowersAsync(Borrower model, CancellationToken ct)
+    public async Task<Result<BorrowerDto>> CreateAsync(CreateBorrowerRequest request, CancellationToken ct)
     {
         var now = DateTime.UtcNow;
-        model.CreatedAt = now;
-        model.UpdatedAt = now;
-        model.IsDeleted = false;
+        var entity = new Borrower
+        {
+            FullName = request.FullName,
+            UserName = request.UserName,
+            Nrcno = request.Nrcno,
+            PhoneNo = request.PhoneNo,
+            Address = request.Address,
+            DocumentId = request.DocumentId,
+            CreatedAt = now,
+            UpdatedAt = now,
+            IsDeleted = false
+        };
 
-        _context.Borrowers.Add(model);
+        _context.Borrowers.Add(entity);
         await _context.SaveChangesAsync(ct);
-        return model;
+
+        return Result<BorrowerDto>.Success(MapToDto(entity));
     }
 
-    public async Task<Borrower?> UpdateBorrowersAsync(int id, Borrower model, CancellationToken ct)
+    public async Task<Result<BorrowerDto>> UpdateAsync(int id, UpdateBorrowerRequest request, CancellationToken ct)
     {
         var entity = await _context.Borrowers
             .FirstOrDefaultAsync(b => b.Id == id && b.IsDeleted != true, ct);
 
-        if (entity is null) return null;
+        if (entity is null)
+        {
+            return Result<BorrowerDto>.Failure("Borrower not found.", 404);
+        }
 
-        entity.FullName = model.FullName;
-        entity.UserName = model.UserName;
-        entity.Nrcno = model.Nrcno;
-        entity.PhoneNo = model.PhoneNo;
-        entity.Address = model.Address;
-        entity.DocumentId = model.DocumentId;
+        entity.FullName = request.FullName;
+        entity.UserName = request.UserName;
+        entity.Nrcno = request.Nrcno;
+        entity.PhoneNo = request.PhoneNo;
+        entity.Address = request.Address;
+        entity.DocumentId = request.DocumentId;
         entity.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync(ct);
-        return entity;
+
+        return Result<BorrowerDto>.Success(MapToDto(entity));
     }
 
-    public async Task<bool> DeleteBorrowersAsync(int id, CancellationToken ct)
+    public async Task<Result<bool>> DeleteAsync(int id, CancellationToken ct)
     {
         var entity = await _context.Borrowers
             .FirstOrDefaultAsync(b => b.Id == id && b.IsDeleted != true, ct);
 
-        if (entity is null) return false;
+        if (entity is null)
+        {
+            return Result<bool>.Failure("Borrower not found.", 404);
+        }
 
         entity.IsDeleted = true;
         entity.DeletedAt = DateTime.UtcNow;
         entity.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync(ct);
-        return true;
+
+        return Result<bool>.Success(true);
     }
 
-    public Task<Borrower?> GetByIdAsync(int id, CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<Borrower> CreateAsync(Borrower borrower, CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<Borrower?> UpdateAsync(int id, Borrower borrower, CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> DeleteAsync(int id, CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
+    private static BorrowerDto MapToDto(Borrower b) =>
+        new()
+        {
+            Id = b.Id,
+            FullName = b.FullName,
+            UserName = b.UserName,
+            Nrcno = b.Nrcno,
+            PhoneNo = b.PhoneNo,
+            Address = b.Address,
+            //DocumentId = b.DocumentId,
+            CreatedAt = b.CreatedAt,
+            UpdatedAt = b.UpdatedAt
+        };
 }

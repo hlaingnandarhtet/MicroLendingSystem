@@ -8,7 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\microlending-shared\MicroLendingSystem.Shared.csproj" />
+    <ProjectReference Include="..\MicroLendingSystem.Backend\MicroLendingSystem.Backend.csproj" />
+    <ProjectReference Include="..\MicroLendingSystem.Database\MicroLendingSystem.Database.csproj" />
+    <ProjectReference Include="..\MicroLendingSystem.Shared\MicroLendingSystem.Shared.csproj" />
   </ItemGroup>
 
 </Project>
