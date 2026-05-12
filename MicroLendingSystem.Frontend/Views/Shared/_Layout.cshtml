@@ -1,49 +1,114 @@
-﻿<!DOCTYPE html>
+@{
+    var isLoginPage = ViewData["IsLoginPage"] as bool? ?? false;
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - microlending_MVC</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <title>@ViewData["Title"] - @(isAuthenticated ? "MicroLending Admin" : "MicroLending")</title>
+    <meta name="description" content="Micro-Lending Management System" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/microlending_MVC.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/micro-lending-bootstrap5-theme.css" asp-append-version="true" />
+    <style>
+        .ml-public-navbar { background: #fff; border-bottom: 1px solid #e8ecf1; box-shadow: 0 .125rem .25rem rgba(15,39,68,.06); }
+        .ml-public-navbar .navbar-brand { font-weight: 700; color: #0f2744 !important; letter-spacing: -.02em; }
+        .ml-public-navbar .nav-link { color: #1e3a5c !important; font-weight: 500; }
+        .ml-public-navbar .nav-link:hover { color: #0d9488 !important; }
+        .ml-public-navbar .btn-login { background: #0f2744; color: #fff; font-weight: 600; border-radius: 2rem; padding: .45rem 1.25rem; }
+        .ml-public-navbar .btn-login:hover { background: #0a1c30; color: #fff; }
+        .ml-public-main { flex: 1 0 auto; padding: 0; margin: 0; width: 100%; }
+    </style>
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">microlending_MVC</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+<body class="@(isLoginPage ? "login-body d-flex flex-column min-vh-100" : isAuthenticated ? "" : "d-flex flex-column min-vh-100")">
+@if (isLoginPage)
+{
+    @RenderBody()
+}
+else if (isAuthenticated)
+{
+    @await Html.PartialAsync("_Sidebar")
+
+    <div class="main-wrapper d-flex flex-column flex-grow-1">
+        <header class="topbar align-items-center py-2 py-md-0">
+            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                <button type="button" class="topbar-toggle" onclick="toggleSidebar()" title="Toggle Sidebar" aria-label="Toggle sidebar">
+                    <span class="material-icons">menu</span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+            </div>
+            <div class="d-flex flex-column flex-grow-1 justify-content-center px-2 px-md-3 min-w-0">
+                <nav aria-label="breadcrumb" class="d-none d-md-block">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+                        <li class="breadcrumb-item active text-truncate" aria-current="page">@ViewData["Title"]</li>
+                    </ol>
+                </nav>
+                <div class="d-md-none small text-muted text-truncate fw-medium">@ViewData["Title"]</div>
+            </div>
+            <div class="topbar-search d-none d-sm-flex">
+                <span class="material-icons">search</span>
+                <input type="search" placeholder="Search..." aria-label="Search" />
+            </div>
+            <div class="topbar-actions">
+                <div class="d-flex flex-column align-items-end me-2 d-none d-md-flex">
+                    <span class="small fw-medium text-dark text-truncate" style="max-width:12rem;">@User.Identity?.Name</span>
+                </div>
+                <div class="topbar-avatar" title="@User.Identity?.Name">
+                    @(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "A")
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+        </header>
+
+        <main class="main-content flex-grow-1">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - microlending_MVC - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <div class="toast-container">
+        <input type="hidden" id="toastMessage" value="@TempData["SuccessMessage"]@TempData["ErrorMessage"]" />
+        <input type="hidden" id="toastType" value="@(TempData["SuccessMessage"] != null ? "success" : TempData["ErrorMessage"] != null ? "error" : "")" />
+    </div>
+
+    @await Html.PartialAsync("_DeleteConfirmModal")
+}
+else
+{
+    <nav class="navbar navbar-expand-lg ml-public-navbar sticky-top">
+        <div class="container-fluid px-3 px-lg-4" style="max-width: 1200px; margin: 0 auto;">
+            <a class="navbar-brand d-flex align-items-center gap-2" asp-controller="Home" asp-action="Index">
+                <span class="material-icons text-primary" style="color:#0d9488 !important;">account_balance</span>
+                MicroLending
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mlPublicNav" aria-controls="mlPublicNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mlPublicNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                    <li class="nav-item"><a class="nav-link" href="#calculator">Calculator</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#plans">Plans</a></li>
+                    <li class="nav-item ms-lg-2">
+                        <a class="btn btn-login" asp-controller="Account" asp-action="Login">Login</a>
+                    </li>
+                </ul>
+            </div>
         </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    </nav>
+    <main class="ml-public-main">
+        @RenderBody()
+    </main>
+}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.js" asp-append-version="true"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

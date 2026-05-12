@@ -1,0 +1,100 @@
+@model PagedViewModel<RoleSummaryDto>
+@using System.Security.Claims
+@{
+    ViewData["Title"] = "Role Permissions"; ViewData["ActivePage"] = "Roles";
+
+    bool HasPerm(string perm) =>
+        User.Claims.Any(c => c.Type == "Permission" && c.Value == perm);
+    bool IsAdmin() =>
+        User.IsInRole("Admin") ||
+        User.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+
+    var canCreate          = IsAdmin() || HasPerm("Role Create");
+    var canUpdate          = IsAdmin() || HasPerm("Role Update");
+    var canDelete          = IsAdmin() || HasPerm("Role Delete");
+    var canAssignPerms     = IsAdmin() || HasPerm("Role Assign Permissions");
+}
+
+<div class="page-header">
+    <h1><span class="material-icons">admin_panel_settings</span> Role Permissions</h1>
+    @if (canCreate)
+    {
+        <a asp-action="Create" class="md-btn md-btn-primary"><span class="material-icons">add</span> Create Role</a>
+    }
+</div>
+
+<div class="md-card rounded-3 shadow-sm">
+    @* <div class="table-toolbar">
+        <div class="row g-2 align-items-end w-100">
+            <div class="col-md-3">
+                <label class="form-label small text-muted mb-1">&nbsp;</label>
+                <input type="text" class="form-control form-control-md rounded-pill" disabled tabindex="-1" value="" aria-hidden="true" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small text-muted mb-1">&nbsp;</label>
+                <input type="text" class="form-control form-control-md rounded-pill" disabled tabindex="-1" value="" aria-hidden="true" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small text-muted mb-1">&nbsp;</label>
+                <input type="text" class="form-control form-control-md rounded-pill" disabled tabindex="-1" value="" aria-hidden="true" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small text-muted mb-1">&nbsp;</label>
+                <input type="text" class="form-control form-control-md rounded-pill" disabled tabindex="-1" value="" aria-hidden="true" />
+            </div>
+        </div>
+    </div> *@
+    <div class="table-wrapper">
+        <table class="md-table">
+            <thead><tr><th>#</th><th>Role Name</th><th>Actions</th></tr></thead>
+            <tbody>
+            @if (Model.Items.Any())
+            {
+                    int rowNumber = 1;
+                @foreach (var r in Model.Items)
+                {
+                    <tr>
+                         <td>@r.Id</td>
+                        <td><strong>@r.Name</strong></td>
+                        <td>
+                            <div class="row-actions">
+                                @if (canAssignPerms)
+                                {
+                                    <a asp-action="AssignPermissions" asp-route-id="@r.Id" class="md-btn-icon view" title="Permissions"><span class="material-icons">security</span></a>
+                                }
+                                @if (canUpdate)
+                                {
+                                    <a asp-action="Edit" asp-route-id="@r.Id" class="md-btn-icon edit" title="Edit"><span class="material-icons">edit</span></a>
+                                }
+                                @if (canDelete)
+                                {
+                                    <a asp-action="Delete" asp-route-id="@r.Id" class="md-btn-icon delete" title="Delete"><span class="material-icons">delete</span></a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                        rowNumber++;
+                }
+            }
+            else
+            {
+                <tr><td colspan="3"><div class="empty-state"><span class="material-icons">inbox</span><p>No roles found</p></div></td></tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    @if (Model.TotalPages > 1)
+    {
+        <div class="pagination-bar">
+            <div class="pagination-info">Showing @Model.StartItem–@Model.EndItem of @Model.TotalCount</div>
+            <div class="pagination-controls">
+                <a asp-action="Index" asp-route-page="@(Model.CurrentPage-1)" class="page-btn @(!Model.HasPreviousPage?"disabled":"")"><span class="material-icons">chevron_left</span></a>
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <a asp-action="Index" asp-route-page="@i" class="page-btn @(i==Model.CurrentPage?"active":"")">@i</a>
+                }
+                <a asp-action="Index" asp-route-page="@(Model.CurrentPage+1)" class="page-btn @(!Model.HasNextPage?"disabled":"")"><span class="material-icons">chevron_right</span></a>
+            </div>
+        </div>
+    }
+</div>

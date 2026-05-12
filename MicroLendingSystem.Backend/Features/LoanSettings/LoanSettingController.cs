@@ -1,10 +1,12 @@
-using microlending_API.Features.Loans;
+using MicroLendingSystem.Backend.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace microlending_API.Features.LoanSettings;
 
 [ApiController]
 [Route("api/loan-settings")]
+[Authorize]
 public class LoanSettingController : ControllerBase
 {
     private readonly ILoanSettingService _service;
@@ -12,6 +14,7 @@ public class LoanSettingController : ControllerBase
     public LoanSettingController(ILoanSettingService service) => _service = service;
 
     [HttpGet]
+    [HasPermission(PermissionNames.LoanSetting_Read)]
     public async Task<IActionResult> GetLoanSettings([FromQuery] GetLoanSettingsRequest request, CancellationToken ct)
     {
         var result = await _service.GetLoanSettingsAsync(request, ct);
@@ -19,6 +22,7 @@ public class LoanSettingController : ControllerBase
     }
 
     [HttpGet("{id:int}/details")]
+    [HasPermission(PermissionNames.LoanSetting_Read)]
     public async Task<IActionResult> GetLoanSettingById(int id, CancellationToken ct)
     {
         var result = await _service.GetLoanSettingByIdAsync(id, ct);
@@ -26,6 +30,7 @@ public class LoanSettingController : ControllerBase
     }
 
     [HttpPost("create")]
+    [HasPermission(PermissionNames.LoanSetting_Create)]
     public async Task<IActionResult> CreateLoanSetting([FromBody] CreateLoanSettingRequest request, CancellationToken ct)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -34,6 +39,7 @@ public class LoanSettingController : ControllerBase
     }
 
     [HttpPut("{id:int}/update")]
+    [HasPermission(PermissionNames.LoanSetting_Update)]
     public async Task<IActionResult> UpdateLoanSetting(int id, [FromBody] UpdateLoanSettingRequest request, CancellationToken ct)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -42,6 +48,7 @@ public class LoanSettingController : ControllerBase
     }
 
     [HttpDelete("{id:int}/delete")]
+    [HasPermission(PermissionNames.LoanSetting_Delete)]
     public async Task<IActionResult> DeleteLoanSetting(int id, CancellationToken ct)
     {
         var result = await _service.DeleteLoanSettingAsync(id, ct);

@@ -1,0 +1,18 @@
+<!-- Delete Confirmation Modal -->
+<div class="md-modal-overlay" id="deleteModal">
+    <div class="md-modal">
+        <div class="md-modal-header">
+            <span class="material-icons">warning</span>
+            <h3>Confirm Delete</h3>
+        </div>
+        <div class="md-modal-body">
+            <p>Are you sure you want to delete <strong id="deleteItemName">this item</strong>? This action cannot be undone.</p>
+        </div>
+        <div class="md-modal-footer">
+            <button class="md-btn md-btn-text" onclick="hideDeleteModal()">Cancel</button>
+            <button class="md-btn md-btn-danger" onclick="confirmDelete()">
+                <span class="material-icons">delete</span> Delete
+            </button>
+        </div>
+    </div>
+</div>

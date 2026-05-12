@@ -8,9 +8,10 @@ public partial class User
 
     public string Email { get; set; } = null!;
 
-    public string Role { get; set; } = null!;
+    /// <summary>Hashed password; persisted in the legacy <c>Password</c> column.</summary>
+    public string PasswordHash { get; set; } = null!;
 
-    public string Password { get; set; } = null!;
+    public int RoleId { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
@@ -19,6 +20,8 @@ public partial class User
     public DateTime? DeletedAt { get; set; }
 
     public bool? IsDeleted { get; set; }
+
+    public virtual Role Role { get; set; } = null!;
 
     public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
 }

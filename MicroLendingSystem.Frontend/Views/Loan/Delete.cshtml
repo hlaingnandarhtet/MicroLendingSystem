@@ -1,0 +1,19 @@
+@model LoanDto
+@{ ViewData["Title"] = "Delete Loan"; ViewData["ActivePage"] = "Loans"; }
+
+<div class="page-header">
+    <h1><span class="material-icons">delete_forever</span> Delete Loan</h1>
+    <a asp-action="Index" class="md-btn md-btn-outline md-btn-sm"><span class="material-icons">arrow_back</span> Back</a>
+</div>
+
+<div class="card rounded-3 shadow-sm border-0 ml-card-shell mx-auto" style="max-width:600px;">
+    <div class="card-body text-center p-5">
+        <span class="material-icons text-danger opacity-75" style="font-size:4rem;">warning</span>
+        <h2 class="h5 mt-3 mb-2">Delete Loan "@Model.LoanCode"?</h2>
+        <p class="text-muted mb-4">This will soft-delete the loan record.</p>
+        <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-flex flex-wrap gap-2 justify-content-center">
+            <button type="submit" class="btn btn-danger rounded-pill px-4"><span class="material-icons align-middle" style="font-size:1.1rem;">delete</span> Confirm Delete</button>
+            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+        </form>
+    </div>
+</div>

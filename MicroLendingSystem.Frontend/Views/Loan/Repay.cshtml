@@ -1,0 +1,44 @@
+@model LoanRepayViewModel
+@{ ViewData["Title"] = "Repay Loan"; ViewData["ActivePage"] = "Loans"; }
+
+<div class="page-header">
+    <h1><span class="material-icons">payments</span> Repay Loan @Model.LoanCode</h1>
+    <a asp-action="Details" asp-route-id="@Model.LoanId" class="md-btn md-btn-outline"><span class="material-icons">arrow_back</span> Back</a>
+</div>
+
+<div class="alert ml-alert ml-alert-info d-flex align-items-center gap-3 mb-4" role="alert">
+    <span class="material-icons flex-shrink-0">account_balance_wallet</span>
+    <div class="small mb-0"><strong>Remaining balance:</strong> @Model.RemainingBalance.ToString("N2")</div>
+</div>
+
+<div class="card rounded-3 shadow-sm border-0 ml-card-shell mx-auto ml-form-page">
+    <div class="card-body">
+        <form asp-action="Repay" method="post">
+            <input type="hidden" asp-for="LoanId" />
+            <input type="hidden" asp-for="LoanCode" />
+            <input type="hidden" asp-for="RemainingBalance" />
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="ml-form-label mb-1 d-block" for="@Html.IdFor(m => m.AmountPaid)">Payment amount<span class="req">*</span></label>
+                    <input asp-for="AmountPaid" type="number" step="0.01" class="form-control ml-form-control" required />
+                </div>
+                <div class="col-md-6">
+                    <label class="ml-form-label mb-1 d-block" for="@Html.IdFor(m => m.PrincipalAmount)">Principal portion</label>
+                    <input asp-for="PrincipalAmount" type="number" step="0.01" class="form-control ml-form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label class="ml-form-label mb-1 d-block" for="@Html.IdFor(m => m.InterestAmount)">Interest portion</label>
+                    <input asp-for="InterestAmount" type="number" step="0.01" class="form-control ml-form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label class="ml-form-label mb-1 d-block" for="@Html.IdFor(m => m.Note)">Note</label>
+                    <input asp-for="Note" class="form-control ml-form-control" placeholder="e.g. Partial repayment #1" />
+                </div>
+            </div>
+            <div class="ml-form-actions">
+                <button type="submit" class="ml-btn-save-form"><span class="material-icons">payments</span> Save</button>
+                <a asp-action="Details" asp-route-id="@Model.LoanId" class="ml-btn-cancel-form">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

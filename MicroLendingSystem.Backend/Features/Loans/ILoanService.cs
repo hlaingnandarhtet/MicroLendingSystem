@@ -1,4 +1,4 @@
-﻿using microlending_API.Features.LoanSettings;
+using microlending_API.Features.LoanSettings;
 using MicroLendingSystem.Shared.Models;
 
 namespace microlending_API.Features.Loans;
@@ -12,4 +12,5 @@ public interface ILoanService
     Task<Result<LoanDto>> UpdateLoanStatusAsync(int id, UpdateLoanStatusRequest request, CancellationToken ct);
     Task<Result<bool>> DeleteLoanAsync(int id, CancellationToken ct);
     Task<Result<LoanDto>> UpdateLoanAsync(int id, UpdateLoanDataRequest request, CancellationToken ct);
+    Task<Result<LoanDto>> RepayLoanAsync(int loanId, RepayLoanRequest request, CancellationToken ct);
 }

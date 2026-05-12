@@ -1,0 +1,508 @@
+/* Micro-Lending — Bootstrap 5 theme overrides (Navy / White / Light Grey) */
+
+:root {
+  --ml-navy: #0f2744;
+  --ml-navy-deep: #0a1c30;
+  --ml-navy-muted: #1e3a5c;
+  --ml-grey-bg: #f4f6f9;
+  --ml-grey-border: #e8ecf1;
+  --ml-white: #ffffff;
+  --bs-primary: #0f2744;
+  --bs-primary-rgb: 15, 39, 68;
+  --bs-link-color: #1e4976;
+  --bs-link-hover-color: #0f2744;
+  --bs-border-radius: 0.5rem;
+  --bs-border-radius-lg: 0.75rem;
+}
+
+body {
+  background-color: var(--ml-grey-bg) !important;
+  color: #1a1a2e;
+}
+
+/* Top bar */
+.topbar {
+  background: var(--ml-white) !important;
+  border-bottom: 1px solid var(--ml-grey-border);
+  box-shadow: 0 0.125rem 0.25rem rgba(15, 39, 68, 0.06) !important;
+}
+
+.topbar .breadcrumb {
+  --bs-breadcrumb-divider-color: #adb5bd;
+  font-size: 0.875rem;
+  margin-bottom: 0;
+}
+
+.topbar .breadcrumb-item a {
+  color: var(--ml-navy-muted);
+  text-decoration: none;
+}
+
+.topbar .breadcrumb-item a:hover {
+  color: var(--ml-navy);
+}
+
+.topbar .breadcrumb-item.active {
+  color: var(--ml-navy);
+  font-weight: 500;
+}
+
+.topbar-avatar {
+  background: linear-gradient(135deg, var(--ml-navy-muted), var(--ml-navy)) !important;
+}
+
+/* Sidebar — subtle hover */
+.sidebar {
+  background: linear-gradient(180deg, var(--ml-navy) 0%, var(--ml-navy-deep) 100%) !important;
+}
+
+.sidebar .nav-item {
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease, padding-left 0.2s ease;
+}
+
+.sidebar .nav-item:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+  transform: translateX(4px);
+  padding-left: 1.15rem;
+}
+
+.sidebar .nav-item.active {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Cards: tables & forms */
+.ml-card-shell {
+  background: var(--ml-white);
+}
+
+.ml-card-shell .card-header {
+  background: var(--ml-white);
+  border-bottom: 1px solid var(--ml-grey-border);
+}
+
+/* Tables */
+.table.ml-table-bootstrap {
+  --bs-table-bg: var(--ml-white);
+  --bs-table-hover-bg: rgba(15, 39, 68, 0.04);
+  --bs-table-striped-bg: rgba(15, 39, 68, 0.02);
+}
+
+.table.ml-table-bootstrap thead th {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  color: #5c6b7a;
+  border-bottom: 2px solid var(--ml-grey-border);
+  white-space: nowrap;
+  background: var(--ml-white);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.ml-table-scroll {
+  max-height: min(70vh, 560px);
+  overflow: auto;
+  border-radius: 0 0 var(--bs-border-radius-lg) var(--bs-border-radius-lg);
+}
+
+/* Forms — floating labels */
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label,
+.form-floating > .form-select ~ label {
+  color: var(--ml-navy-muted);
+}
+
+.form-floating > .form-control:focus {
+  border-color: var(--ml-navy-muted);
+  box-shadow: 0 0 0 0.2rem rgba(15, 39, 68, 0.12);
+}
+
+/* Buttons — pill (global helpers) */
+.btn-pill-success {
+  border-radius: 50rem !important;
+}
+
+.btn-pill-danger {
+  border-radius: 50rem !important;
+}
+
+.btn-pill-info {
+  border-radius: 50rem !important;
+}
+
+.btn.rounded-pill.btn-success,
+.btn-approve-ml {
+  border-radius: 50rem !important;
+}
+
+.btn.rounded-pill.btn-danger,
+.btn-reject-ml {
+  border-radius: 50rem !important;
+}
+
+.btn.rounded-pill.btn-info,
+.btn-repay-ml {
+  border-radius: 50rem !important;
+  color: #fff !important;
+}
+
+/* Map existing MD buttons to pill + theme (optional coexistence) */
+.md-btn.md-btn-primary,
+.md-btn-primary {
+  border-radius: 50rem !important;
+  background: var(--ml-navy) !important;
+  border: none;
+}
+
+.md-btn.md-btn-primary:hover,
+.md-btn-primary:hover {
+  background: var(--ml-navy-deep) !important;
+}
+
+.md-btn.md-btn-outline {
+  border-radius: 50rem !important;
+  border-color: var(--ml-navy) !important;
+  color: var(--ml-navy) !important;
+}
+
+.md-btn.md-btn-outline:hover {
+  background: rgba(15, 39, 68, 0.06) !important;
+}
+
+.md-btn.md-btn-text {
+  border-radius: 50rem !important;
+}
+
+.md-btn.md-btn-danger,
+.md-btn-danger {
+  border-radius: 50rem !important;
+}
+
+/* Page header alignment with Bootstrap */
+.page-header h1 .material-icons {
+  color: var(--ml-navy) !important;
+}
+
+/* Pagination pills */
+.pagination-controls .page-btn {
+  border-radius: 50rem !important;
+}
+
+.pagination-controls .page-btn.active {
+  background: var(--ml-navy) !important;
+}
+
+/* Login page untouched */
+body.login-body {
+  background: var(--ml-grey-bg);
+}
+
+/* Data cards & toolbars */
+.card.ml-card-shell .table-toolbar {
+  padding: 1rem 1.25rem;
+  background: var(--ml-white);
+}
+
+.card.ml-card-shell .pagination-bar {
+  background: var(--ml-white);
+  border-top: 1px solid var(--ml-grey-border);
+  border-radius: 0 0 0.75rem 0.75rem;
+}
+
+.ml-table-scroll + .pagination-bar {
+  border-radius: 0;
+}
+
+.empty-state {
+  padding: 2.5rem 1rem;
+}
+
+/* Form shell */
+.ml-form-card {
+  max-width: 960px;
+}
+
+/* Create / Update forms — uppercase labels, calm inputs, navy pill save + text cancel */
+.ml-form-page .card-body {
+  padding: 2rem 2.5rem !important;
+}
+
+@media (max-width: 576px) {
+  .ml-form-page .card-body {
+    padding: 1.5rem !important;
+  }
+}
+
+.ml-form-page .ml-form-label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  color: #5c6470;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.ml-form-page .ml-form-label .req {
+  color: #dc3545;
+  font-weight: 700;
+  margin-left: 0.15em;
+}
+
+.ml-form-page .form-control.ml-form-control,
+.ml-form-page .form-select.ml-form-control {
+  border: 1px solid #dfe3e8;
+  border-radius: 0.375rem;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.9375rem;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 39, 68, 0.04);
+}
+
+.ml-form-page .form-control.ml-form-control:focus,
+.ml-form-page .form-select.ml-form-control:focus {
+  border-color: rgba(15, 39, 68, 0.35);
+  box-shadow: 0 0 0 0.2rem rgba(15, 39, 68, 0.08);
+}
+
+.ml-form-page .ml-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 2rem;
+  padding-top: 0.35rem;
+}
+
+.ml-form-page .ml-btn-save-form {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #0f2744;
+  color: #fff !important;
+  border: none;
+  border-radius: 50rem;
+  padding: 0.55rem 1.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.ml-form-page .ml-btn-save-form:hover,
+.ml-form-page .ml-btn-save-form:focus {
+  background: #0a1c30;
+  color: #fff !important;
+}
+
+.ml-form-page .ml-btn-save-form .material-icons {
+  font-size: 1.125rem;
+}
+
+.ml-form-page .ml-btn-cancel-form {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #4a6fa5;
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0.55rem 0;
+  cursor: pointer;
+}
+
+.ml-form-page .ml-btn-cancel-form:hover {
+  color: #0f2744;
+  text-decoration: underline;
+}
+
+.ml-form-page .form-check-input {
+  width: 1.05rem;
+  height: 1.05rem;
+  margin-top: 0.15rem;
+}
+
+.ml-form-page .ml-form-check-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #5c6470;
+  text-transform: uppercase;
+  margin-left: 0.35rem;
+  cursor: pointer;
+}
+
+.ml-form-card.ml-form-card-wide {
+  max-width: 1100px;
+}
+
+.ml-alert {
+  border-radius: var(--bs-border-radius-lg);
+  border: 1px solid var(--ml-grey-border);
+  background: rgba(15, 39, 68, 0.04);
+}
+
+.ml-alert-warning {
+  background: rgba(255, 152, 0, 0.08);
+  border-color: rgba(255, 152, 0, 0.25);
+  color: #8d4a00;
+}
+
+.ml-alert-info {
+  background: rgba(13, 110, 253, 0.08);
+  border-color: rgba(13, 110, 253, 0.2);
+  color: var(--ml-navy-muted);
+}
+
+/* Permission assign grid */
+.ml-perm-grid .form-check {
+  padding: 0.85rem 1rem;
+  margin: 0;
+  border: 1px solid var(--ml-grey-border);
+  border-radius: var(--bs-border-radius-lg);
+  background: var(--ml-white);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.ml-perm-grid .form-check:hover {
+  border-color: rgba(15, 39, 68, 0.25);
+  box-shadow: 0 0.125rem 0.35rem rgba(15, 39, 68, 0.06);
+}
+
+.ml-perm-grid .form-check-input {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.15rem;
+}
+
+.ml-perm-grid .form-check-label {
+  padding-left: 0.35rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+/* Floating selects: consistent height */
+.form-floating > .form-select {
+  padding-top: 1.625rem;
+  padding-bottom: 0.625rem;
+}
+
+/* Row action density in tables */
+.row-actions {
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+/* ── Striped bordered data table + column search + actions ───────── */
+.ml-data-table-panel {
+  border-radius: 0.75rem !important;
+  overflow: hidden;
+  background: var(--ml-white);
+  border: 1px solid var(--ml-grey-border);
+  box-shadow: 0 0.125rem 0.35rem rgba(15, 39, 68, 0.06);
+}
+
+.table.ml-data-table {
+  --ml-table-navy: #0f2744;
+  margin-bottom: 0;
+  border-color: var(--ml-grey-border) !important;
+}
+
+.table.ml-data-table > :not(caption) > * > * {
+  padding: 12px !important;
+  vertical-align: middle;
+}
+
+.table.ml-data-table thead tr.ml-table-filter-row th {
+  background: #f4f6f9;
+  border-color: var(--ml-grey-border) !important;
+  font-weight: 400;
+  padding: 10px 12px !important;
+}
+
+.table.ml-data-table thead tr.ml-table-head-row th {
+  background: var(--ml-table-navy) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  white-space: nowrap;
+}
+
+.table.ml-data-table tbody tr:nth-of-type(odd) > * {
+  background-color: rgba(15, 39, 68, 0.02);
+}
+
+.table.ml-data-table tbody tr:hover > * {
+  background-color: rgba(13, 110, 253, 0.09) !important;
+}
+
+.ml-search-input-wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.ml-search-input-wrap .bi {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+  color: #6c757d;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ml-col-search {
+  width: 100%;
+  border-radius: 20px !important;
+  border: 1px solid #dee2e6 !important;
+  padding: 0.35rem 0.75rem 0.35rem 2rem !important;
+  font-size: 0.8125rem;
+  box-shadow: 0 1px 3px rgba(15, 39, 68, 0.06);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ml-col-search::placeholder {
+  color: #adb5bd;
+  font-size: 0.8125rem;
+}
+
+.ml-col-search:focus {
+  border-color: rgba(15, 39, 68, 0.35) !important;
+  box-shadow: 0 1px 4px rgba(15, 39, 68, 0.1), 0 0 0 0.2rem rgba(15, 39, 68, 0.08);
+  outline: none;
+}
+
+.ml-table-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ml-table-actions .ml-act-approve {
+  border-radius: 50rem !important;
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.65rem !important;
+  line-height: 1.2;
+}
+
+.ml-table-actions .ml-act-reject {
+  border-radius: 50rem !important;
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.65rem !important;
+  line-height: 1.2;
+}
+
+.ml-table-actions .ml-act-solid {
+  border-radius: 50rem !important;
+  font-size: 0.75rem !important;
+  padding: 0.25rem 0.65rem !important;
+  line-height: 1.2;
+}

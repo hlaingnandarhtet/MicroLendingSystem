@@ -1,0 +1,24 @@
+@model RoleFormViewModel
+@{ ViewData["Title"] = "Create Role"; ViewData["ActivePage"] = "Roles"; }
+
+<div class="page-header">
+    <h1><span class="material-icons">add_circle</span> Create Role</h1>
+    <a asp-action="Index" class="md-btn"><span class="material-icons">arrow_back</span> Back</a>
+</div>
+
+<div class="card rounded-3 shadow-sm border-0 ml-card-shell mx-auto ml-form-page">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="ml-form-label mb-1 d-block" for="@Html.IdFor(m => m.Name)">Role name<span class="req">*</span></label>
+                    <input asp-for="Name" class="form-control ml-form-control" required placeholder="e.g. Manager" />
+                </div>
+            </div>
+            <div class="ml-form-actions">
+                <button type="submit" class="ml-btn-save-form"><span class="material-icons">save</span> Save</button>
+                <a asp-action="Index" class="ml-btn-cancel-form">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

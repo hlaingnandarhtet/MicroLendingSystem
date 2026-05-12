@@ -1,0 +1,90 @@
+@model LoanDto
+@using System.Security.Claims
+@{
+    ViewData["Title"] = "Loan Details"; ViewData["ActivePage"] = "Loans";
+    var cls = Model.Status switch { 1 => "pending", 2 => "active", 3 => "complete", 4 => "overdue", _ => "rejected" };
+    var lbl = Model.Status switch { 1 => "Pending", 2 => "Active", 3 => "Complete", 4 => "Overdue", _ => "Rejected" };
+
+    bool HasPerm(string perm) =>
+        User.Claims.Any(c => c.Type == "Permission" && c.Value == perm);
+    bool IsAdmin() =>
+        User.IsInRole("Admin") ||
+        User.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+
+    var canUpdate  = IsAdmin() || HasPerm("Loan Update");
+    var canApprove = IsAdmin();
+    var canRepay = IsAdmin() || User.IsInRole("Borrower") || HasPerm("Loan Repay");
+}
+
+<div class="page-header">
+    <h1><span class="material-icons">receipt_long</span> Loan @Model.LoanCode</h1>
+    <div class="d-flex flex-wrap gap-2">
+        @if (canApprove && Model.Status == 1)
+        {
+            <form asp-action="ApproveReject" asp-route-id="@Model.Id" asp-route-statusId="2" method="post" class="d-inline">
+                <button type="submit" class="btn btn-success btn-sm rounded-pill px-3"><span class="material-icons align-middle" style="font-size:1rem;">check</span> Approve</button>
+            </form>
+            <form asp-action="ApproveReject" asp-route-id="@Model.Id" asp-route-statusId="5" method="post" class="d-inline">
+                <button type="submit" class="btn btn-danger btn-sm rounded-pill px-3"><span class="material-icons align-middle" style="font-size:1rem;">close</span> Reject</button>
+            </form>
+        }
+        @if (canRepay && Model.Status == 2)
+        {
+            <a asp-action="Repay" asp-route-id="@Model.Id" class="btn btn-info btn-sm rounded-pill px-3 text-white"><span class="material-icons align-middle" style="font-size:1rem;">payments</span> Repay</a>
+        }
+        @if (canUpdate)
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="md-btn md-btn-primary md-btn-sm"><span class="material-icons">edit</span> Edit</a>
+        }
+        <a asp-action="Index" class="md-btn md-btn-outline md-btn-sm"><span class="material-icons">arrow_back</span> Back</a>
+    </div>
+</div>
+
+<div class="card rounded-3 shadow-sm border-0 ml-card-shell mb-4">
+    <div class="card-body p-4">
+        <div class="detail-grid">
+            <div class="detail-item"><div class="detail-label">Loan Code</div><div class="detail-value">@Model.LoanCode</div></div>
+            <div class="detail-item"><div class="detail-label">Status</div><div class="detail-value"><span class="md-chip @cls">@lbl</span></div></div>
+            <div class="detail-item"><div class="detail-label">Borrower</div><div class="detail-value">@Model.Borrower?.FullName</div></div>
+            <div class="detail-item"><div class="detail-label">Plan</div><div class="detail-value">@Model.PlanName</div></div>
+            <div class="detail-item"><div class="detail-label">Loan Amount</div><div class="detail-value">@Model.LoanAmount.ToString("N2")</div></div>
+            <div class="detail-item"><div class="detail-label">Interest Rate</div><div class="detail-value">@Model.InterestRate%</div></div>
+            <div class="detail-item"><div class="detail-label">Term</div><div class="detail-value">@Model.LoanTerm @(Model.CalculationType==1?"months":"days")</div></div>
+            <div class="detail-item"><div class="detail-label">Total Repayable</div><div class="detail-value">@(Model.TotalRepayableAmount?.ToString("N2") ?? "—")</div></div>
+            <div class="detail-item"><div class="detail-label">Remaining Balance</div><div class="detail-value">@(Model.RemainingBalance?.ToString("N2") ?? "—")</div></div>
+            <div class="detail-item"><div class="detail-label">Start Date</div><div class="detail-value">@Model.StartDate?.ToString("dd MMM yyyy")</div></div>
+            <div class="detail-item"><div class="detail-label">End Date</div><div class="detail-value">@Model.EndDate?.ToString("dd MMM yyyy")</div></div>
+            <div class="detail-item"><div class="detail-label">Created</div><div class="detail-value">@Model.CreatedAt?.ToString("dd MMM yyyy HH:mm")</div></div>
+        </div>
+    </div>
+</div>
+
+@if (Model.Transactions?.Any() == true)
+{
+    <div class="card rounded-3 shadow-sm border-0 ml-card-shell">
+        <div class="card-header bg-white border-bottom py-3 rounded-top-3">
+            <h3 class="h6 mb-0 fw-semibold">Transaction History</h3>
+        </div>
+        <div class="ml-table-scroll">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead><tr><th>Id</th><th>Type</th><th>Amount</th><th>Principal</th><th>Interest</th><th>Date</th><th>Note</th></tr></thead>
+                    <tbody>
+                    @foreach (var t in Model.Transactions)
+                    {
+                        <tr>
+                            <td>@t.Id</td>
+                            <td><span class="md-chip @(t.TransactionType==1?"active":"complete")">@(t.TransactionType==1?"Disbursement":"Repayment")</span></td>
+                            <td>@t.Amount.ToString("N2")</td>
+                            <td>@(t.PrincipalAmount?.ToString("N2") ?? "—")</td>
+                            <td>@(t.InterestAmount?.ToString("N2") ?? "—")</td>
+                            <td>@t.TransactionDate.ToString("dd MMM yyyy")</td>
+                            <td>@(t.Description ?? "—")</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

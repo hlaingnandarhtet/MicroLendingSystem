@@ -1,0 +1,25 @@
+@model BorrowerDto
+@{ ViewData["Title"] = "Borrower Details"; ViewData["ActivePage"] = "Borrowers"; }
+
+<div class="page-header">
+    <h1><span class="material-icons">person</span> Borrower Details</h1>
+    <div class="d-flex flex-wrap gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="md-btn md-btn-primary md-btn-sm"><span class="material-icons">edit</span> Edit</a>
+        <a asp-action="Index" class="md-btn md-btn-outline md-btn-sm"><span class="material-icons">arrow_back</span> Back</a>
+    </div>
+</div>
+
+<div class="card rounded-3 shadow-sm border-0 ml-card-shell">
+    <div class="card-body p-4">
+        <div class="detail-grid">
+            <div class="detail-item"><div class="detail-label">ID</div><div class="detail-value">@Model.Id</div></div>
+            <div class="detail-item"><div class="detail-label">Full Name</div><div class="detail-value">@Model.FullName</div></div>
+            <div class="detail-item"><div class="detail-label">Username</div><div class="detail-value">@(Model.UserName ?? "—")</div></div>
+            <div class="detail-item"><div class="detail-label">NRC Number</div><div class="detail-value">@(Model.Nrcno ?? "—")</div></div>
+            <div class="detail-item"><div class="detail-label">Phone</div><div class="detail-value">@(Model.PhoneNo ?? "—")</div></div>
+            <div class="detail-item"><div class="detail-label">Address</div><div class="detail-value">@(Model.Address ?? "—")</div></div>
+            <div class="detail-item"><div class="detail-label">Created</div><div class="detail-value">@Model.CreatedAt?.ToString("dd MMM yyyy HH:mm")</div></div>
+            <div class="detail-item"><div class="detail-label">Updated</div><div class="detail-value">@Model.UpdatedAt?.ToString("dd MMM yyyy HH:mm")</div></div>
+        </div>
+    </div>
+</div>

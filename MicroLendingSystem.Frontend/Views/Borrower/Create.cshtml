@@ -1,0 +1,71 @@
+@model BorrowerFormViewModel
+@{ ViewData["Title"] = "Add Borrower"; ViewData["ActivePage"] = "Borrowers"; }
+
+<div class="page-header">
+    <h1><span class="material-icons">person_add</span> Add Borrower</h1>
+    <a asp-action="Index" class="md-btn"><span class="material-icons">arrow_back</span> Back</a>
+</div>
+
+<div class="card rounded-3 shadow-sm border-0 ml-card-shell mx-auto ml-form-page">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="ml-form-label mb-1 d-block" for="@Html.IdFor(m => m.FullName)">Full name<span class="req">*</span></label>
+                    <input asp-for="FullName" class="form-control ml-form-control" required />
+                </div>
+                <div class="col-md-6">
+                    <label class="ml-form-label mb-1 d-block" for="@Html.IdFor(m => m.UserName)">Username</label>
+                    <input asp-for="UserName" class="form-control ml-form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label class="ml-form-label mb-1 d-block" for="@Html.IdFor(m => m.Nrcno)">NRC number</label>
+                    <input asp-for="Nrcno" class="form-control ml-form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label class="ml-form-label mb-1 d-block" for="@Html.IdFor(m => m.PhoneNo)">Phone number</label>
+                    <input asp-for="PhoneNo" class="form-control ml-form-control" />
+                </div>
+                <div class="col-12">
+                    <label class="ml-form-label mb-1 d-block" for="@Html.IdFor(m => m.Address)">Address</label>
+                    <input asp-for="Address" class="form-control ml-form-control" />
+                </div>
+                <div class="col-12 col-md-6 d-flex align-items-end">
+                    <div class="form-check mb-2">
+                        <input asp-for="CreateLoginAccount" type="checkbox" id="chkCreateLogin" class="form-check-input" />
+                        <label class="form-check-label ml-form-check-label" for="chkCreateLogin">Create login account</label>
+                    </div>
+                </div>
+                <div class="col-md-6 d-none" id="loginFields">
+                    <label class="ml-form-label mb-1 d-block" for="@Html.IdFor(m => m.LoginEmail)">Email<span class="req">*</span></label>
+                    <input asp-for="LoginEmail" type="email" class="form-control ml-form-control" autocomplete="off" />
+                </div>
+                <div class="col-md-6 d-none" id="loginFieldsPwd">
+                    <label class="ml-form-label mb-1 d-block" for="@Html.IdFor(m => m.LoginPassword)">Password<span class="req">*</span></label>
+                    <input asp-for="LoginPassword" type="password" class="form-control ml-form-control" autocomplete="new-password" />
+                </div>
+            </div>
+            <div class="ml-form-actions">
+                <button type="submit" class="ml-btn-save-form"><span class="material-icons">save</span> Save</button>
+                <a asp-action="Index" class="ml-btn-cancel-form">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var chk = document.getElementById('chkCreateLogin');
+            var boxes = [document.getElementById('loginFields'), document.getElementById('loginFieldsPwd')];
+            function sync() {
+                var on = chk && chk.checked;
+                boxes.forEach(function (el) {
+                    if (!el) return;
+                    el.classList.toggle('d-none', !on);
+                });
+            }
+            if (chk) { chk.addEventListener('change', sync); sync(); }
+        })();
+    </script>
+}

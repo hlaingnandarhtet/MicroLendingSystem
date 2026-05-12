@@ -1,0 +1,44 @@
+@model LoanFormViewModel
+@{ ViewData["Title"] = "Create Loan"; ViewData["ActivePage"] = "Loans"; }
+
+<div class="page-header">
+    <h1><span class="material-icons">add_card</span> Create Loan</h1>
+    <a asp-action="Index" class="md-btn"><span class="material-icons">arrow_back</span> Back</a>
+</div>
+
+<div class="card rounded-3 shadow-sm border-0 ml-card-shell mx-auto ml-form-page">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="ml-form-label mb-1 d-block" for="@Html.IdFor(m => m.BorrowerId)">Borrower<span class="req">*</span></label>
+                    <select asp-for="BorrowerId" class="form-select ml-form-control" required>
+                        <option value="">Select borrower…</option>
+                        @foreach (var b in Model.Borrowers)
+                        {
+                            <option value="@b.Id">@b.FullName (@b.PhoneNo)</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="ml-form-label mb-1 d-block" for="@Html.IdFor(m => m.LoanSettingId)">Loan plan<span class="req">*</span></label>
+                    <select asp-for="LoanSettingId" class="form-select ml-form-control" required>
+                        <option value="">Select plan…</option>
+                        @foreach (var s in Model.LoanSettings)
+                        {
+                            <option value="@s.Id">@s.PlanName — @s.InterestRate% / @s.LoanTerm @(s.CalculationType == CalculationType.Monthly ? "months" : "days")</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="ml-form-label mb-1 d-block" for="@Html.IdFor(m => m.LoanAmount)">Loan amount<span class="req">*</span></label>
+                    <input asp-for="LoanAmount" type="number" step="0.01" class="form-control ml-form-control" required />
+                </div>
+            </div>
+            <div class="ml-form-actions">
+                <button type="submit" class="ml-btn-save-form"><span class="material-icons">save</span> Save</button>
+                <a asp-action="Index" class="ml-btn-cancel-form">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

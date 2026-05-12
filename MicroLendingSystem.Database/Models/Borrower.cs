@@ -24,6 +24,12 @@ public partial class Borrower
 
     public int? DocumentId { get; set; }
 
+    public int? UserId { get; set; }
+    public virtual User? User { get; set; }
+
+    /// <summary>User who registered this borrower (staff isolation).</summary>
+    public int? CreatedById { get; set; }
+
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }

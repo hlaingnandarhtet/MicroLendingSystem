@@ -1,4 +1,4 @@
-﻿using microlending_API.Features.Loans;
+using microlending_API.Features.Loans;
 using MicroLendingSystem.Database.AppDbContext;
 using MicroLendingSystem.Database.Models;
 using MicroLendingSystem.Shared.Models;
@@ -20,10 +20,19 @@ namespace microlending_API.Features.LoanSettings
                 return PagedResult<PagedPayload<LoanSettingDto>>.Failure("Invalid pagination parameters.", 400);
             }
 
-            var query = _context.LoanSettings.AsNoTracking().Where(s => s.IsDeleted != true);
+            // Only surface active (non-versioned-out) settings for new loan applications.
+            var query = _context.LoanSettings
+                .AsNoTracking()
+                .Where(s => s.IsDeleted != true && s.IsActive == true);
+
+            if (!string.IsNullOrWhiteSpace(request.PlanName))
+            {
+                query = query.Where(s => s.PlanName.Contains(request.PlanName));
+            }
+
             var total = await query.CountAsync(ct);
             var entities = await query
-                .OrderBy(s => s.PlanName)
+                .OrderByDescending(s => s.Id)
                 .Skip((request.Page - 1) * request.PageSize)
                 .Take(request.PageSize)
                 .ToListAsync(ct);
@@ -84,21 +93,38 @@ namespace microlending_API.Features.LoanSettings
                 return Result<LoanSettingDto>.Failure("Invalid calculation type.", 400);
             }
 
-            var entity = await _context.LoanSettings.FirstOrDefaultAsync(s => s.Id == id && s.IsDeleted != true, ct);
-            if (entity is null)
+            var existing = await _context.LoanSettings
+                .FirstOrDefaultAsync(s => s.Id == id && s.IsDeleted != true, ct);
+
+            if (existing is null)
             {
                 return Result<LoanSettingDto>.Failure("Loan setting not found.", 404);
             }
 
-            entity.PlanName = request.PlanName;
-            entity.InterestRate = request.InterestRate;
-            entity.LoanTerm = request.LoanTerm;
-            entity.CalculationType = (int)request.CalculationType;
-            entity.UpdatedAt = DateTime.UtcNow;
+            var now = DateTime.UtcNow;
 
+            // --- Versioning: deactivate the current record instead of mutating it ---
+            existing.IsActive = false;
+            existing.UpdatedAt = now;
+            // IsDeleted stays false so existing loans still resolve their FK.
+
+            // Create the new version as the active record.
+            var newVersion = new LoanSetting
+            {
+                PlanName = request.PlanName,
+                InterestRate = request.InterestRate,
+                LoanTerm = request.LoanTerm,
+                CalculationType = (int)request.CalculationType,
+                CreatedAt = now,
+                UpdatedAt = now,
+                IsDeleted = false,
+                IsActive = true
+            };
+
+            _context.LoanSettings.Add(newVersion);
             await _context.SaveChangesAsync(ct);
 
-            return Result<LoanSettingDto>.Success(MapLoanSettingToDto(entity));
+            return Result<LoanSettingDto>.Success(MapLoanSettingToDto(newVersion));
         }
 
         public async Task<Result<bool>> DeleteLoanSettingAsync(int id, CancellationToken ct)
@@ -133,7 +159,7 @@ namespace microlending_API.Features.LoanSettings
             CalculationType = (CalculationType)s.CalculationType,
             CreatedAt = s.CreatedAt,
             UpdatedAt = s.UpdatedAt,
-            //IsActive = s.IsActive ?? false
+            IsActive = s.IsActive ?? false
         };
     }
 }

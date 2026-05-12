@@ -1,0 +1,218 @@
+@model DashboardViewModel
+@{ ViewData["Title"] = "Dashboard"; ViewData["ActivePage"] = "Dashboard"; }
+
+<style>
+    .ml-dash-page { --ml-navy: #0f2744; --ml-navy-2: #1e3a5c; --ml-teal: #0d9488; --ml-teal-bg: rgba(13,148,136,.12); }
+    .ml-dash-hero {
+        background: linear-gradient(120deg, var(--ml-navy) 0%, var(--ml-navy-2) 55%, #153a5c 100%);
+        color: #fff;
+        border-radius: 1rem;
+        padding: 1.5rem 1.5rem 1.25rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 .5rem 1.25rem rgba(15,39,68,.2);
+    }
+    .ml-dash-hero h1 { font-weight: 700; letter-spacing: -.02em; }
+    .ml-dash-hero .material-icons { color: #5eead4; }
+    .ml-kpi-card {
+        border: 1px solid #e8ecf1;
+        border-radius: 1rem;
+        background: #fff;
+        box-shadow: 0 .125rem .5rem rgba(15,39,68,.06);
+        transition: transform .2s ease, box-shadow .2s ease;
+        height: 100%;
+    }
+    .ml-kpi-card:hover { transform: translateY(-2px); box-shadow: 0 .35rem 1rem rgba(15,39,68,.1); }
+    .ml-kpi-icon {
+        width: 48px; height: 48px;
+        border-radius: .75rem;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    .ml-kpi-icon .material-icons { font-size: 26px; }
+    .ml-kpi-label { font-size: .72rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #6c757d; }
+    .ml-kpi-value { font-size: 1.65rem; font-weight: 700; color: var(--ml-navy); line-height: 1.2; }
+    .ml-kpi-sub { font-size: .78rem; color: #8b9aab; }
+    .ml-kpi-revenue { background: linear-gradient(145deg, #0f2744 0%, #1a3d66 100%); border: 0; color: #fff; }
+    .ml-kpi-revenue .ml-kpi-label { color: rgba(255,255,255,.65); }
+    .ml-kpi-revenue .ml-kpi-value { color: #fff; }
+    .ml-kpi-revenue .ml-kpi-sub { color: rgba(255,255,255,.55); }
+    .ml-kpi-revenue .ml-kpi-icon { background: rgba(94,234,212,.2); }
+    .ml-kpi-revenue .ml-kpi-icon .material-icons { color: #5eead4; }
+    .ml-dash-panel { border: 1px solid #e8ecf1; border-radius: 1rem; background: #fff; box-shadow: 0 .125rem .5rem rgba(15,39,68,.05); overflow: hidden; }
+    .ml-dash-panel-h {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #e8ecf1;
+        background: linear-gradient(180deg, #fafbfd 0%, #fff 100%);
+    }
+    .ml-dash-panel-h h3 { color: var(--ml-navy); font-weight: 700; font-size: .95rem; margin: 0; display: flex; align-items: center; gap: .5rem; }
+    .ml-dash-panel-h .material-icons { font-size: 1.25rem; color: var(--ml-teal); }
+    .ml-dash-table-wrap { max-height: 340px; overflow: auto; }
+    .ml-dash-table-wrap .md-table thead th { position: sticky; top: 0; z-index: 1; background: #fff; }
+</style>
+
+<div class="ml-dash-page">
+    <div class="ml-dash-hero d-flex flex-column flex-md-row align-items-md-center justify-content-md-between gap-3">
+        <div>
+            <h1 class="h3 mb-1 d-flex align-items-center gap-2 mb-0">
+                <span class="material-icons">dashboard</span>
+                @(Model.ShowBorrowerDashboard ? "My dashboard" : "Admin dashboard")
+            </h1>
+            <p class="mb-0 small" style="opacity:.88;">
+                @(Model.ShowBorrowerDashboard ? "Your loan summary and recent activity." : "Overview of users, borrowers, portfolio, and monthly revenue.")
+            </p>
+        </div>
+        <div class="d-none d-md-flex align-items-center gap-2 rounded-3 px-3 py-2" style="background: rgba(255,255,255,.1);">
+            <span class="material-icons" style="font-size: 1.1rem; opacity: .9;">calendar_today</span>
+            <span class="small fw-medium">@DateTime.UtcNow.ToString("dd MMM yyyy")</span>
+        </div>
+    </div>
+
+    @if (Model.ShowBorrowerDashboard)
+    {
+        <div class="row g-3 g-lg-4 mb-4">
+            <div class="col-sm-6 col-xl-3">
+                <div class="ml-kpi-card p-4 d-flex align-items-start gap-3">
+                    <div class="ml-kpi-icon" style="background: var(--ml-teal-bg);"><span class="material-icons" style="color: var(--ml-teal);">payments</span></div>
+                    <div class="min-w-0">
+                        <div class="ml-kpi-label">Borrowed amount</div>
+                        <div class="ml-kpi-value">@Model.BorrowedAmount.ToString("N0")</div>
+                        <div class="ml-kpi-sub">Total disbursed (excl. rejected)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="ml-kpi-card p-4 d-flex align-items-start gap-3">
+                    <div class="ml-kpi-icon" style="background: var(--ml-teal-bg);"><span class="material-icons" style="color: var(--ml-teal);">savings</span></div>
+                    <div class="min-w-0">
+                        <div class="ml-kpi-label">Repaid amount</div>
+                        <div class="ml-kpi-value">@Model.RepaidAmount.ToString("N0")</div>
+                        <div class="ml-kpi-sub">Completed repayments</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="ml-kpi-card p-4 d-flex align-items-start gap-3">
+                    <div class="ml-kpi-icon" style="background: rgba(15,39,68,.08);"><span class="material-icons" style="color: var(--ml-navy);">account_balance_wallet</span></div>
+                    <div class="min-w-0">
+                        <div class="ml-kpi-label">Remaining balance</div>
+                        <div class="ml-kpi-value">@Model.RemainingBalance.ToString("N0")</div>
+                        <div class="ml-kpi-sub">Outstanding principal</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="ml-kpi-card p-4 d-flex align-items-start gap-3">
+                    <div class="ml-kpi-icon" style="background: rgba(255,152,0,.12);"><span class="material-icons" style="color: #e65100;">percent</span></div>
+                    <div class="min-w-0">
+                        <div class="ml-kpi-label">Accrued interest</div>
+                        <div class="ml-kpi-value">@Model.AccruedInterest.ToString("N0")</div>
+                        <div class="ml-kpi-sub">Interest component</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-3 g-lg-4 mb-4">
+            <div class="col-sm-6 col-xl-3">
+                <div class="ml-kpi-card p-4 d-flex align-items-start gap-3">
+                    <div class="ml-kpi-icon" style="background: var(--ml-teal-bg);"><span class="material-icons" style="color: var(--ml-teal);">manage_accounts</span></div>
+                    <div class="min-w-0">
+                        <div class="ml-kpi-label">Active users</div>
+                        <div class="ml-kpi-value">@Model.ActiveUsersCount</div>
+                        <div class="ml-kpi-sub">Registered accounts (not deleted)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="ml-kpi-card p-4 d-flex align-items-start gap-3">
+                    <div class="ml-kpi-icon" style="background: rgba(15,39,68,.08);"><span class="material-icons" style="color: var(--ml-navy);">groups</span></div>
+                    <div class="min-w-0">
+                        <div class="ml-kpi-label">Total borrowers</div>
+                        <div class="ml-kpi-value">@Model.TotalBorrowersCount</div>
+                        <div class="ml-kpi-sub">In your visible scope</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="ml-kpi-card p-4 d-flex align-items-start gap-3">
+                    <div class="ml-kpi-icon" style="background: rgba(33,150,243,.12);"><span class="material-icons" style="color: #1565c0;">trending_up</span></div>
+                    <div class="min-w-0">
+                        <div class="ml-kpi-label">All borrowed amount</div>
+                        <div class="ml-kpi-value">@Model.TotalBorrowedAmountAll.ToString("N0")</div>
+                        <div class="ml-kpi-sub">Portfolio (excl. rejected)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="ml-kpi-card ml-kpi-revenue p-4 d-flex align-items-start gap-3">
+                    <div class="ml-kpi-icon"><span class="material-icons">monetization_on</span></div>
+                    <div class="min-w-0">
+                        <div class="ml-kpi-label">Revenue (this month)</div>
+                        <div class="ml-kpi-value">@Model.RevenueThisMonth.ToString("N0")</div>
+                        <div class="ml-kpi-sub">Completed repayments MTD</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="ml-dash-panel h-100 d-flex flex-column">
+                <div class="ml-dash-panel-h">
+                    <h3><span class="material-icons">show_chart</span> Loan activity (6 months)</h3>
+                </div>
+                <div class="p-3 p-md-4 flex-grow-1">
+                    <div class="chart-wrapper ml-chart-wrap" style="min-height: 280px;">
+                        <canvas id="loanChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="ml-dash-panel h-100 d-flex flex-column">
+                <div class="ml-dash-panel-h">
+                    <h3><span class="material-icons">request_quote</span> Recent loans</h3>
+                </div>
+                <div class="ml-dash-table-wrap flex-grow-1">
+                    @if (Model.RecentLoans.Any())
+                    {
+                        <table class="md-table mb-0">
+                            <thead>
+                                <tr><th>Code</th><th>Borrower</th><th>Status</th></tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var loan in Model.RecentLoans)
+                            {
+                                var cls = loan.Status switch { 1 => "pending", 2 => "active", 3 => "complete", 4 => "overdue", _ => "rejected" };
+                                var lbl = loan.Status switch { 1 => "Pending", 2 => "Active", 3 => "Complete", 4 => "Overdue", _ => "Rejected" };
+                                <tr>
+                                    <td><a asp-controller="Loan" asp-action="Details" asp-route-id="@loan.Id" class="fw-semibold" style="color: var(--ml-navy);">@loan.LoanCode</a></td>
+                                    <td>@loan.BorrowerName</td>
+                                    <td><span class="md-chip @cls">@lbl</span></td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="empty-state py-5"><span class="material-icons">inbox</span><p>No recent loans</p></div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var labels = [@Html.Raw(string.Join(",", Model.MonthlyData.Select(d => $"'{d.Label}'")))];
+        var data = [@Html.Raw(string.Join(",", Model.MonthlyData.Select(d => d.Value.ToString("F0"))))];
+        initDashboardChart(labels, data);
+    });
+</script>
+}

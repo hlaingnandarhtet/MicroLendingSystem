@@ -1,32 +1,23 @@
-using microlending_MVC.Models;
-using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using MicroLendingSystem.Frontend.Models;
 
-namespace microlending_MVC.Controllers
+namespace MicroLendingSystem.Frontend.Controllers;
+
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    [AllowAnonymous]
+    public IActionResult Index()
     {
-        private readonly ILogger<HomeController> _logger;
+        ViewData["Title"] = "Home";
+        return View();
+    }
 
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
-
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+    [AllowAnonymous]
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error()
+    {
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }

@@ -1,0 +1,165 @@
+@model TransactionListViewModel
+@{ ViewData["Title"] = "Transactions"; ViewData["ActivePage"] = "Transactions"; }
+
+<div class="page-header">
+    <h1><span class="material-icons">receipt_long</span> Transactions</h1>
+</div>
+
+<div class="md-card rounded-3 shadow-sm">
+    <div class="table-toolbar">
+        <form id="searchForm" method="get" asp-action="Transactions" class="w-100">
+            <div class="row g-2 align-items-end w-100">
+                <div class="col-md-2">
+                    <label class="form-label small text-muted mb-1">Loan Code</label>
+                    <input type="text" class="form-control form-control-md rounded-pill search-input" name="loanCode" value="@ViewBag.LoanCode" placeholder="Search code..." />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted mb-1">Borrower</label>
+                    <input type="text" class="form-control form-control-md rounded-pill search-input" name="borrowerName" value="@ViewBag.BorrowerName" placeholder="Search borrower..." />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted mb-1">Start Date</label>
+                    <input type="date" class="form-control form-control-md rounded-pill search-input" name="startDate" value="@ViewBag.StartDate" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted mb-1">End Date</label>
+                    <input type="date" class="form-control form-control-md rounded-pill search-input" name="endDate" value="@ViewBag.EndDate" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted mb-1">Status</label>
+                    <select id="txStatus" name="status" class="form-select form-select-md rounded-pill search-input">
+                        <option value="">All</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Failed">Failed</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="table-wrapper">
+        <table class="md-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Code</th>
+                    <th>Borrower</th>
+                    <th>Loan Amount</th>
+                    <th>Total Repayable</th>
+                    <th>Remaining</th>
+                    <th>Paid</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (Model.Items.Any())
+            {
+                int rowNumber = (Model.CurrentPage - 1) * Model.PageSize + 1;
+                @foreach (var t in Model.Items)
+                {
+                    var statusCls = t.Status switch { "Completed" => "complete", "Pending" => "pending", "Failed" => "rejected", _ => "" };
+                    <tr>
+                        <td><strong>@rowNumber</strong></td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@t.LoanId" style="color:#3F51B5;text-decoration:none;font-weight:600;">
+                                @t.LoanCode
+                            </a>
+                        </td>
+                        <td>@t.BorrowerName</td>
+                        <td>@t.LoanAmount.ToString("N2")</td>
+                        <td>@(t.TotalRepayableAmount?.ToString("N2") ?? "—")</td>
+                        <td>@(t.RemainingBalance?.ToString("N2") ?? "—")</td>
+                        <td style="color:#2E7D32;font-weight:600;">@t.Paid.ToString("N2")</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(statusCls))
+                            {
+                                <span class="md-chip @statusCls">@t.Status</span>
+                            }
+                            else
+                            {
+                                <span>@t.Status</span>
+                            }
+                        </td>
+                        <td>@t.TransactionDate.ToString("dd MMM yyyy")</td>
+                    </tr>
+                    rowNumber++;
+                }
+            }
+            else
+            {
+                <tr><td colspan="9"><div class="empty-state"><span class="material-icons">inbox</span><p>No transactions found</p></div></td></tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    @if (Model.TotalCount > 0)
+    {
+        <div class="pagination-bar">
+            <div class="pagination-info">Showing @Model.StartItem–@Model.EndItem of @Model.TotalCount</div>
+            <div class="pagination-controls">
+                @{
+                    var routeData = new Dictionary<string, string> {
+                        { "loanCode", ViewBag.LoanCode },
+                        { "borrowerName", ViewBag.BorrowerName },
+                        { "status", ViewBag.Status },
+                        { "startDate", ViewBag.StartDate },
+                        { "endDate", ViewBag.EndDate }
+                    };
+                }
+                <a asp-action="Transactions" asp-all-route-data="routeData" asp-route-page="@(Model.CurrentPage - 1)" 
+                   class="page-btn @(!Model.HasPreviousPage?"disabled":"")" title="Previous">
+                    <span class="material-icons">chevron_left</span>
+                </a>
+                
+                @if (Model.TotalPages > 1)
+                {
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <a asp-action="Transactions" asp-all-route-data="routeData" asp-route-page="@i"
+                           class="page-btn @(i == Model.CurrentPage ? "active" : "")">@i</a>
+                    }
+                }
+                else
+                {
+                    <span class="page-btn active">1</span>
+                }
+
+                <a asp-action="Transactions" asp-all-route-data="routeData" asp-route-page="@(Model.CurrentPage + 1)" 
+                   class="page-btn @(!Model.HasNextPage?"disabled":"")" title="Next">
+                    <span class="material-icons">chevron_right</span>
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    var sel = document.getElementById('txStatus');
+    if (sel) {
+        var v = '@(ViewBag.Status as string ?? "")';
+        for (var i = 0; i < sel.options.length; i++) {
+            if (sel.options[i].value === v) { sel.selectedIndex = i; break; }
+        }
+    }
+    var inputs = document.querySelectorAll('.search-input');
+    var timer;
+    inputs.forEach(function (input) {
+        input.addEventListener('input', function () {
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                document.getElementById('searchForm').submit();
+            }, 450);
+        });
+        input.addEventListener('change', function () {
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                document.getElementById('searchForm').submit();
+            }, 200);
+        });
+    });
+})();
+</script>
+}

@@ -15,20 +15,8 @@ BEGIN
 END
 GO
 
-IF OBJECT_ID(N'dbo.Disbursements', N'U') IS NULL
-BEGIN
-    CREATE TABLE dbo.Disbursements (
-        Id               INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-        LoanId           INT               NOT NULL,
-        Amount           DECIMAL(18,2)   NOT NULL,
-        TransactionType  INT               NOT NULL,
-        TransactionDate  DATE              NOT NULL,
-        CreatedAt        DATETIME          NOT NULL DEFAULT (GETUTCDATE()),
-        IsDeleted        BIT               NOT NULL DEFAULT (0),
-        CONSTRAINT FK_Disbursements_Loans FOREIGN KEY (LoanId) REFERENCES dbo.Loans (Id)
-    );
-END
-GO
+-- Disbursements / repayments: use dbo.Transactions (LoanId + TransactionType 1 / 2).
+-- Legacy dbo.Disbursements removed; see Scripts/DropLegacyDisbursementRepaymentTables.sql.
 
 IF COL_LENGTH(N'dbo.Loans', N'LoanSettingId') IS NULL
 BEGIN

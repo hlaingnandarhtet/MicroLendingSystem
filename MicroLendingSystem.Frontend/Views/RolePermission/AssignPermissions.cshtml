@@ -1,0 +1,40 @@
+@model AssignPermissionsViewModel
+@{ ViewData["Title"] = "Assign Permissions"; ViewData["ActivePage"] = "Roles"; }
+
+<div class="page-header">
+    <h1><span class="material-icons">security</span> Assign Permissions — @Model.RoleName</h1>
+    <a asp-action="Index" class="md-btn md-btn-outline"><span class="material-icons">arrow_back</span> Back</a>
+</div>
+
+<div class="card rounded-3 shadow-sm border-0 ml-card-shell ml-form-card-wide mx-auto ml-form-page">
+    <div class="card-body">
+        <form asp-action="AssignPermissions" asp-route-id="@Model.RoleId" method="post">
+            <input type="hidden" asp-for="RoleId" />
+            <input type="hidden" asp-for="RoleName" />
+
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-2 ml-perm-grid">
+                @for (int i = 0; i < Model.Permissions.Count; i++)
+                {
+                    <div class="col">
+                        <div class="form-check h-100">
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   name="Permissions[@i].IsSelected"
+                                   value="true"
+                                   id="perm_@i"
+                                   @(Model.Permissions[i].IsSelected ? "checked" : "") />
+                            <input type="hidden" name="Permissions[@i].Id" value="@Model.Permissions[i].Id" />
+                            <input type="hidden" name="Permissions[@i].Name" value="@Model.Permissions[i].Name" />
+                            <label class="form-check-label w-100" for="perm_@i">@Model.Permissions[i].Name</label>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="ml-form-actions border-top border-light pt-4 mt-4">
+                <button type="submit" class="ml-btn-save-form"><span class="material-icons">save</span> Save</button>
+                <a asp-action="Index" class="ml-btn-cancel-form">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

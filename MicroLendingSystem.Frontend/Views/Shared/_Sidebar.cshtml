@@ -1,0 +1,136 @@
+﻿@using System.Security.Claims
+@using MicroLendingSystem.Frontend.Infrastructure
+@{
+    var activePage = ViewData["ActivePage"]?.ToString() ?? "";
+
+    // ၁။ Permission စစ်ဆေးသည့် Logic (Database ရှိ Space ပါသော စာသားများနှင့် တိုက်စစ်ရန်)
+    // image_941d80.png အရ "Loan Approve", "Loan Read" စသည့် Space ပါသော နာမည်များကို သုံးရပါမည်
+    bool P(string x)
+    {
+        if (User.IsInRole("Admin"))
+            return true;
+
+        foreach (var c in User.Claims)
+        {
+            var type = (c.Type ?? string.Empty).Trim();
+            if (string.Equals(type, ClaimTypes.Role, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(type, "role", StringComparison.OrdinalIgnoreCase))
+            {
+                var roleVal = (c.Value ?? string.Empty).Trim();
+                if (string.Equals(roleVal, "Admin", StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+        }
+
+        var required = (x ?? string.Empty).Trim();
+        if (required.Length == 0)
+            return false;
+
+        return User.Claims.Any(c =>
+            string.Equals((c.Type ?? string.Empty).Trim(), "Permission", StringComparison.OrdinalIgnoreCase)
+            && string.Equals((c.Value ?? string.Empty).Trim(), required, StringComparison.OrdinalIgnoreCase));
+    }
+
+    bool MenuBorrower() => P("Borrower Read") || P("Borrower Create") || P("Borrower Update") || P("Borrower Delete");
+
+    bool MenuLoans() => P("Loan Read") || P("Loan Create") || P("Loan Approve") || P("Loan Repay") || P("Loan Request List");
+
+    bool MenuTx() => P("Transaction List") || P("Transaction Export");
+
+    bool MenuSettings() => P("Loan Setting Read") || P("Loan Setting Create") || P("Loan Setting Update") || P("Loan Setting Delete");
+
+    bool MenuUsers() => P("User Read") || P("User Create");
+
+    bool MenuRoles() => P("Role Read") || P("Role Assign Permissions");
+}
+
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon">
+            <span class="material-icons">account_balance</span>
+        </div>
+        <span class="brand-text">MicroLending</span>
+    </div>
+
+    <nav class="sidebar-nav">
+        @* Dashboard - အားလုံးမြင်ရမည် *@
+        <a asp-controller="Dashboard" asp-action="Index" class="nav-item @(activePage == "Dashboard" ? "active" : "")">
+            <span class="material-icons">dashboard</span>
+            <span class="nav-label">Dashboard</span>
+        </a>
+
+        @* Borrowers Menu *@
+        @if (MenuBorrower())
+        {
+            <a asp-controller="Borrower" asp-action="Index" class="nav-item @(activePage == "Borrowers" ? "active" : "")">
+                <span class="material-icons">people</span>
+                <span class="nav-label">Borrowers</span>
+            </a>
+        }
+
+        @* Loans Menu *@
+        @if (MenuLoans())
+        {
+            <a asp-controller="Loan" asp-action="Index" class="nav-item @(activePage == "Loans" ? "active" : "")">
+                <span class="material-icons">request_quote</span>
+                <span class="nav-label">Loans</span>
+            </a>
+        }
+
+        @* Transactions Menu *@
+        @if (MenuTx())
+        {
+            <a asp-controller="Loan" asp-action="Transactions" class="nav-item @(activePage == "Transactions" ? "active" : "")">
+                <span class="material-icons">receipt_long</span>
+                <span class="nav-label">Transactions</span>
+            </a>
+        }
+
+        @* Loan Settings Menu *@
+        @if (MenuSettings())
+        {
+            <a asp-controller="LoanSetting" asp-action="Index" class="nav-item @(activePage == "LoanSettings" ? "active" : "")">
+                <span class="material-icons">tune</span>
+                <span class="nav-label">Loan Settings</span>
+            </a>
+        }
+
+        @* Users Management Menu *@
+        @if (MenuUsers())
+        {
+            <a asp-controller="User" asp-action="Index" class="nav-item @(activePage == "Users" ? "active" : "")">
+                <span class="material-icons">manage_accounts</span>
+                <span class="nav-label">Users</span>
+            </a>
+        }
+
+        @* Role & Permissions Menu *@
+        @if (MenuRoles())
+        {
+            <a asp-controller="RolePermission" asp-action="Index" class="nav-item @(activePage == "Roles" ? "active" : "")">
+                <span class="material-icons">admin_panel_settings</span>
+                <span class="nav-label">Role Permissions</span>
+            </a>
+        }
+    </nav>
+
+    <div class="sidebar-footer">
+        @* <div class="sidebar-user-info">
+            <div class="topbar-avatar" style="margin-right:10px;">
+                @(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "U")
+            </div>
+            <div>
+                <div style="font-weight:600;font-size:.85rem;">@User.Identity?.Name</div>
+                <div style="font-size:.75rem;opacity:.7;">
+                    @User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value
+                </div>
+            </div>
+        </div> *@
+        <form asp-controller="Account" asp-action="Logout" method="post">
+            <button type="submit" class="nav-item" style="width:100%;border:none;background:none;font:inherit;cursor:pointer;">
+                <span class="material-icons">logout</span>
+                <span class="nav-label">Logout</span>
+            </button>
+        </form>
+    </div>
+</aside>

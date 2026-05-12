@@ -6,15 +6,14 @@ public partial class Loan
 
     public int BorrowerId { get; set; }
 
-    public int? LoanSettingId { get; set; }
+    public int LoanSettingId { get; set; }
+
+    /// <summary>User who created this loan request (staff isolation).</summary>
+    public int? CreatedById { get; set; }
 
     public string LoanCode { get; set; } = null!;
 
     public decimal LoanAmount { get; set; }
-
-    public decimal InterestRate { get; set; }
-
-    public int LoanTerm { get; set; }
 
     /// <summary>1 = Monthly, 2 = Daily (snapshot from loan setting at creation).</summary>
     public int? CalculationType { get; set; }

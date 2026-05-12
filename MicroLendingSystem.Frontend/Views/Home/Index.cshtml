@@ -1,8 +1,309 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Home";
 }
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap" />
+<style>
+    .ml-landing { font-family: 'Urbanist', system-ui, sans-serif; margin: 0; --ml-navy: #0f2744; --ml-navy-deep: #0a1c30; --ml-teal: #0d9488; --ml-teal-light: #5eead4; --ml-grey-bg: #f4f6f9; }
+    .ml-landing-hero {
+        background: linear-gradient(135deg, var(--ml-navy-deep) 0%, var(--ml-navy) 45%, #153a5c 100%);
+        color: #fff;
+        padding: clamp(2.5rem, 5vw, 4rem) clamp(1.25rem, 4vw, 3rem) clamp(2rem, 4vw, 3.5rem);
+        position: relative;
+        overflow: hidden;
+    }
+    .ml-landing-hero::after {
+        content: '';
+        position: absolute;
+        right: -20%;
+        top: -30%;
+        width: 55%;
+        height: 160%;
+        background: radial-gradient(ellipse, rgba(13,148,136,.35) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    .ml-landing-hero h1 { font-weight: 700; letter-spacing: -0.02em; }
+    .ml-landing-hero .lead { color: rgba(255,255,255,.85); max-width: 36rem; }
+    .ml-landing-calc {
+        background: #fff;
+        border-radius: 1rem;
+        box-shadow: 0 1rem 2.5rem rgba(0,0,0,.18);
+        color: #1a1a2e;
+        padding: 1.5rem 1.5rem 1.25rem;
+    }
+    .ml-landing-calc .form-range::-webkit-slider-thumb { background: var(--ml-teal); }
+    .ml-landing-calc .form-range::-moz-range-thumb { background: var(--ml-teal); border: 0; }
+    .ml-landing-summary {
+        background: linear-gradient(145deg, rgba(13,148,136,.12), rgba(15,39,68,.06));
+        border: 1px solid rgba(15,39,68,.08);
+        border-radius: .75rem;
+        padding: 1rem 1.25rem;
+    }
+    .ml-landing-summary .val { font-weight: 700; color: var(--ml-navy); font-size: 1.1rem; }
+    .ml-trust {
+        background: var(--ml-grey-bg);
+        padding: 1.75rem 1.25rem 2rem;
+        border-bottom: 1px solid #e8ecf1;
+    }
+    .ml-trust-item {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        padding: .75rem 1rem;
+        background: #fff;
+        border-radius: .75rem;
+        border: 1px solid #e8ecf1;
+        height: 100%;
+        box-shadow: 0 .125rem .35rem rgba(15,39,68,.06);
+    }
+    .ml-trust-item i { font-size: 1.75rem; color: var(--ml-teal); }
+    .ml-trust-item strong { color: var(--ml-navy); display: block; font-size: .95rem; }
+    .ml-trust-item span { font-size: .8rem; color: #5c6b7a; }
+    .ml-plans { padding: 2.5rem 1.25rem 3rem; background: #fff; }
+    .ml-plan-card {
+        border: 1px solid #e8ecf1;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        height: 100%;
+        transition: transform .2s, box-shadow .2s;
+        background: #fff;
+    }
+    .ml-plan-card:hover { transform: translateY(-4px); box-shadow: 0 .75rem 1.75rem rgba(15,39,68,.1); }
+    .ml-plan-card h3 { color: var(--ml-navy); font-weight: 700; font-size: 1.15rem; }
+    .ml-plan-card .badge-soft { background: rgba(13,148,136,.12); color: #0f766e; font-weight: 600; }
+    .ml-plan-card .detail-row { font-size: .9rem; color: #495057; border-bottom: 1px dashed #e8ecf1; padding: .4rem 0; }
+    .ml-plan-card .detail-row:last-of-type { border-bottom: 0; }
+    .btn-ml-apply { background: var(--ml-navy); color: #fff; font-weight: 600; border-radius: 2rem; padding: .5rem 1.25rem; }
+    .btn-ml-apply:hover { background: var(--ml-navy-deep); color: #fff; }
+    .modal-ml .modal-header { background: linear-gradient(90deg, var(--ml-navy), #153a5c); color: #fff; border: 0; }
+    .modal-ml .modal-header .btn-close { filter: invert(1); }
+    .modal-ml .modal-body { padding: 1.5rem; font-family: 'Urbanist', system-ui, sans-serif; }
+    .modal-ml .contact-line { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; color: var(--ml-navy); }
+    .modal-ml .contact-line i { color: var(--ml-teal); }
+    .ml-landing-footer {
+        background: linear-gradient(180deg, var(--ml-navy-deep) 0%, var(--ml-navy) 100%);
+        color: rgba(255,255,255,.88);
+        padding: 2.5rem 1.25rem 1.5rem;
+        font-size: .9rem;
+    }
+    .ml-landing-footer a { color: rgba(94,234,212,.95); text-decoration: none; }
+    .ml-landing-footer a:hover { color: #fff; text-decoration: underline; }
+    .ml-landing-footer .footer-brand { font-weight: 700; color: #fff; letter-spacing: -.02em; }
+    .ml-landing-footer .footer-muted { color: rgba(255,255,255,.55); font-size: .8rem; }
+</style>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="ml-landing">
+    <section id="calculator" class="ml-landing-hero">
+        <div class="container-fluid position-relative" style="z-index:1; max-width: 1200px;">
+            <div class="row align-items-center g-4 g-lg-5">
+                <div class="col-lg-6">
+                    <h1 class="display-5 mb-3">Smart micro-loans for your goals</h1>
+                    <p class="lead mb-0">Estimate repayments in seconds. Transparent rates, flexible terms, and support from our lending team.</p>
+                </div>
+                <div class="col-lg-6">
+                    <div class="ml-landing-calc">
+                        <h2 class="h5 fw-bold mb-3" style="color:#0f2744;">Loan calculator</h2>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label small fw-semibold mb-0" for="calcAmount">Amount</label>
+                                <span class="small fw-bold text-teal" id="calcAmountLabel" style="color:#0d9488;">200,000</span>
+                            </div>
+                            <input type="range" class="form-range" id="calcAmount" min="50000" max="5000000" step="50000" value="200000" />
+                            <div class="d-flex justify-content-between small text-muted"><span>50,000</span><span>5,000,000</span></div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label small fw-semibold mb-0" for="calcMonths">Duration (months)</label>
+                                <span class="small fw-bold" style="color:#0f2744;" id="calcMonthsLabel">12</span>
+                            </div>
+                            <input type="range" class="form-range" id="calcMonths" min="3" max="48" step="1" value="12" />
+                            <div class="d-flex justify-content-between small text-muted"><span>3</span><span>48</span></div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label small fw-semibold mb-0" for="calcRate">Annual interest (%)</label>
+                                <span class="small fw-bold" style="color:#0f2744;" id="calcRateLabel">18</span>
+                            </div>
+                            <input type="range" class="form-range" id="calcRate" min="8" max="36" step="1" value="18" />
+                        </div>
+                        <div class="ml-landing-summary mt-2">
+                            <div class="row g-2 text-center small">
+                                <div class="col-4">
+                                    <div class="text-muted text-uppercase" style="font-size:.65rem; letter-spacing:.04em;">Monthly</div>
+                                    <div class="val" id="calcMonthly">—</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="text-muted text-uppercase" style="font-size:.65rem; letter-spacing:.04em;">Total pay</div>
+                                    <div class="val" id="calcTotal">—</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="text-muted text-uppercase" style="font-size:.65rem; letter-spacing:.04em;">Interest</div>
+                                    <div class="val" id="calcInterest">—</div>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-0 mt-2 text-center" style="font-size:.72rem;">Illustrative only (reducing balance, monthly).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="ml-trust">
+        <div class="container-fluid" style="max-width: 1200px;">
+            <div class="row g-3 g-md-4">
+                <div class="col-6 col-md-3">
+                    <div class="ml-trust-item">
+                        <i class="bi bi-shield-check"></i>
+                        <div><strong>Trusted</strong><span>Regulated, clear terms</span></div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="ml-trust-item">
+                        <i class="bi bi-lightning-charge"></i>
+                        <div><strong>Fast</strong><span>Quick decisions</span></div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="ml-trust-item">
+                        <i class="bi bi-ui-checks-grid"></i>
+                        <div><strong>Simple</strong><span>Easy application flow</span></div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="ml-trust-item">
+                        <i class="bi bi-wallet2"></i>
+                        <div><strong>Practical</strong><span>Built for real needs</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="plans" class="ml-plans">
+        <div class="container-fluid" style="max-width: 1200px;">
+            <h2 class="h3 fw-bold text-center mb-2" style="color:#0f2744;">Loan plans</h2>
+            <p class="text-center text-muted mb-4 mx-auto" style="max-width: 520px;">Choose a plan that fits. Speak with us to confirm eligibility and final pricing.</p>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="ml-plan-card">
+                        <span class="badge badge-soft rounded-pill px-3 py-2 mb-2 d-inline-block">Personal</span>
+                        <h3 class="mb-3">Standard</h3>
+                        <div class="detail-row d-flex justify-content-between"><span>Rate (APR)</span><span class="fw-semibold">15% – 22%</span></div>
+                        <div class="detail-row d-flex justify-content-between"><span>Limit</span><span class="fw-semibold">Up to 3,000,000</span></div>
+                        <div class="detail-row d-flex justify-content-between"><span>Term</span><span class="fw-semibold">6 – 24 months</span></div>
+                        <button type="button" class="btn btn-ml-apply w-100 mt-3" data-bs-toggle="modal" data-bs-target="#mlApplyModal">Apply now</button>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="ml-plan-card border-teal" style="border-color:#0d9488; border-width:2px;">
+                        <span class="badge rounded-pill px-3 py-2 mb-2 d-inline-block" style="background:#0d9488; color:#fff;">Popular</span>
+                        <h3 class="mb-3">Business</h3>
+                        <div class="detail-row d-flex justify-content-between"><span>Rate (APR)</span><span class="fw-semibold">12% – 18%</span></div>
+                        <div class="detail-row d-flex justify-content-between"><span>Limit</span><span class="fw-semibold">Up to 15,000,000</span></div>
+                        <div class="detail-row d-flex justify-content-between"><span>Term</span><span class="fw-semibold">12 – 48 months</span></div>
+                        <button type="button" class="btn btn-ml-apply w-100 mt-3" data-bs-toggle="modal" data-bs-target="#mlApplyModal">Apply now</button>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="ml-plan-card">
+                        <span class="badge badge-soft rounded-pill px-3 py-2 mb-2 d-inline-block">Short-term</span>
+                        <h3 class="mb-3">Emergency</h3>
+                        <div class="detail-row d-flex justify-content-between"><span>Rate (APR)</span><span class="fw-semibold">20% – 28%</span></div>
+                        <div class="detail-row d-flex justify-content-between"><span>Limit</span><span class="fw-semibold">Up to 800,000</span></div>
+                        <div class="detail-row d-flex justify-content-between"><span>Term</span><span class="fw-semibold">3 – 12 months</span></div>
+                        <button type="button" class="btn btn-ml-apply w-100 mt-3" data-bs-toggle="modal" data-bs-target="#mlApplyModal">Apply now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>
+
+<footer class="ml-landing-footer">
+    <div class="container-fluid px-3" style="max-width: 1200px; margin: 0 auto;">
+        <div class="row g-4 pb-3">
+            <div class="col-md-4">
+                <div class="footer-brand mb-2 d-flex align-items-center gap-2">
+                    <span class="material-icons" style="font-size: 1.35rem; color: #5eead4;">account_balance</span>
+                    MicroLending
+                </div>
+                <p class="small mb-0" style="color: rgba(255,255,255,.7); line-height: 1.5;">Transparent micro-loans, simple tools, and support for borrowers and businesses.</p>
+            </div>
+            <div class="col-6 col-md-4">
+                <div class="fw-semibold text-white mb-2 small text-uppercase" style="letter-spacing: .06em;">Explore</div>
+                <ul class="list-unstyled mb-0 small">
+                    <li class="mb-2"><a href="#calculator">Loan calculator</a></li>
+                    <li class="mb-2"><a href="#features">Why us</a></li>
+                    <li class="mb-2"><a href="#plans">Loan plans</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md-4">
+                <div class="fw-semibold text-white mb-2 small text-uppercase" style="letter-spacing: .06em;">Contact</div>
+                <ul class="list-unstyled mb-0 small">
+                    <li class="mb-2"><a href="tel:+959000000000">+95 900 000 0000</a></li>
+                    <li class="mb-2"><a href="mailto:admin@microlending.local">admin@microlending.local</a></li>
+                    <li class="mb-2"><a asp-controller="Account" asp-action="Login">Staff login</a></li>
+                </ul>
+            </div>
+        </div>
+        <hr class="border-secondary opacity-25 my-0" />
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 pt-3 footer-muted">
+            <span>&copy; @DateTime.UtcNow.Year MicroLending. All rights reserved.</span>
+            <span>Illustrative rates — final terms on approval.</span>
+        </div>
+    </div>
+</footer>
+
+<div class="modal fade modal-ml" id="mlApplyModal" tabindex="-1" aria-labelledby="mlApplyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-3 overflow-hidden">
+            <div class="modal-header py-3">
+                <h2 class="modal-title h5 mb-0" id="mlApplyModalLabel">Apply for a loan</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">Contact Admin at <strong>+95 900 000 0000</strong> or <strong>admin@microlending.local</strong> to register an account before applying.</p>
+                <button type="button" class="btn btn-ml-apply w-100" data-bs-dismiss="modal">Understood</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    function fmt(n) {
+        return Math.round(n).toLocaleString(undefined, { maximumFractionDigits: 0 });
+    }
+    function calc() {
+        var P = parseFloat(document.getElementById('calcAmount').value);
+        var n = parseInt(document.getElementById('calcMonths').value, 10);
+        var apr = parseFloat(document.getElementById('calcRate').value) / 100;
+        var r = apr / 12;
+        document.getElementById('calcAmountLabel').textContent = fmt(P);
+        document.getElementById('calcMonthsLabel').textContent = String(n);
+        document.getElementById('calcRateLabel').textContent = document.getElementById('calcRate').value;
+        var monthly = 0, total = 0, interest = 0;
+        if (n > 0 && P > 0) {
+            if (r === 0) {
+                monthly = P / n;
+                total = P;
+                interest = 0;
+            } else {
+                var pow = Math.pow(1 + r, n);
+                monthly = P * r * pow / (pow - 1);
+                total = monthly * n;
+                interest = total - P;
+            }
+        }
+        document.getElementById('calcMonthly').textContent = fmt(monthly);
+        document.getElementById('calcTotal').textContent = fmt(total);
+        document.getElementById('calcInterest').textContent = fmt(interest);
+    }
+    ['calcAmount', 'calcMonths', 'calcRate'].forEach(function (id) {
+        document.getElementById(id).addEventListener('input', calc);
+    });
+    calc();
+})();
+</script>
+}
