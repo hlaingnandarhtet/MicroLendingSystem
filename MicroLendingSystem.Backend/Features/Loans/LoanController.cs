@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using MicroLendingSystem.Backend.Authorization;
 
-
+using microlending_API.Features.LoanSettings;
 
 namespace microlending_API.Features.Loans;
 
@@ -22,9 +22,13 @@ public class LoanController : ControllerBase
 
     private readonly ILoanService _service;
 
+    private readonly ILoanSettingService _loanSettingService;
 
-
-    public LoanController(ILoanService service) => _service = service;
+    public LoanController(ILoanService service, ILoanSettingService loanSettingService)
+    {
+        _service = service;
+        _loanSettingService = loanSettingService;
+    }
 
 
 
@@ -56,6 +60,20 @@ public class LoanController : ControllerBase
 
         return result.IsSuccess ? Ok(result.Data) : StatusCode(result.StatusCode, result.Error);
 
+    }
+
+
+
+    /// <summary>
+    /// Loan plans for the create-loan form. Requires <see cref="PermissionNames.Loan_Create"/> so borrowers
+    /// can load plan options without <see cref="PermissionNames.LoanSetting_Read"/> (admin settings API).
+    /// </summary>
+    [HttpGet("plan-options")]
+    [HasPermission(PermissionNames.Loan_Create)]
+    public async Task<IActionResult> GetPlanOptionsForLoanCreate([FromQuery] GetLoanSettingsRequest request, CancellationToken ct)
+    {
+        var result = await _loanSettingService.GetLoanSettingsAsync(request, ct);
+        return result.IsSuccess ? Ok(result.Data) : StatusCode(result.StatusCode, result.Error);
     }
 
 

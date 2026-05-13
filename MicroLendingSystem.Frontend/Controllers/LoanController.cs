@@ -278,7 +278,7 @@ public class LoanController : Controller
         var borrowers = await _http.GetFromJsonAsync<PagedPayload<BorrowerDto>>(
             "api/borrowers?page=1&pageSize=200", ct);
         var settings = await _http.GetFromJsonAsync<PagedPayload<LoanSettingDto>>(
-            "api/loan-settings?page=1&pageSize=100", ct);
+            "api/loans/plan-options?page=1&pageSize=100", ct);
         return new LoanFormViewModel
         {
             Borrowers  = borrowers?.Items  ?? new List<BorrowerDto>(),

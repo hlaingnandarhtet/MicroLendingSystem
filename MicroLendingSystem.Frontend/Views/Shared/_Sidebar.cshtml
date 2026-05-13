@@ -2,9 +2,6 @@
 @using MicroLendingSystem.Frontend.Infrastructure
 @{
     var activePage = ViewData["ActivePage"]?.ToString() ?? "";
-
-    // ၁။ Permission စစ်ဆေးသည့် Logic (Database ရှိ Space ပါသော စာသားများနှင့် တိုက်စစ်ရန်)
-    // image_941d80.png အရ "Loan Approve", "Loan Read" စသည့် Space ပါသော နာမည်များကို သုံးရပါမည်
     bool P(string x)
     {
         if (User.IsInRole("Admin"))

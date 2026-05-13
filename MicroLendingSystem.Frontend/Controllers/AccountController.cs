@@ -70,24 +70,14 @@ public class AccountController : Controller
             new(ClaimTypes.Role,           user.RoleName)
         };
 
-        try
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        
+        // Add permissions directly from the login response
+        foreach (var perm in loginDto.Permissions)
         {
-            var roleResponse = await _http.GetAsync($"api/roles/{user.RoleId}/details", ct);
-            if (roleResponse.IsSuccessStatusCode)
-            {
-                var role = await roleResponse.Content.ReadFromJsonAsync<RoleDetailDto>(cancellationToken: ct);
-                if (role?.Permissions != null)
-                {
-                    foreach (var perm in role.Permissions)
-                        claims.Add(new Claim("Permission", perm));
-                }
-            }
-        }
-        catch
-        {
+            identity.AddClaim(new Claim("Permission", perm));
         }
 
-        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
             new ClaimsPrincipal(identity),

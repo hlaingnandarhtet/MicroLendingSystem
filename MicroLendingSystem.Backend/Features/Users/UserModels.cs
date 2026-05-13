@@ -64,4 +64,6 @@ public sealed class LoginDto
     public int ExpiresInMinutes { get; init; }
 
     public UserDto User { get; init; } = null!;
+
+    public List<string> Permissions { get; init; } = new();
 }

@@ -59,7 +59,8 @@ public sealed class UserService : IUserService
         {
             Token = token,
             ExpiresInMinutes = _jwt.AccessTokenExpirationMinutes,
-            User = dto
+            User = dto,
+            Permissions = permissions
         };
 
         return Result<LoginDto>.Success(payload);

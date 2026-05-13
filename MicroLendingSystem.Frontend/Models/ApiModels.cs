@@ -224,6 +224,7 @@ public class LoginDto
     public string Token { get; set; } = string.Empty;
     public int ExpiresInMinutes { get; set; }
     public UserDto User { get; set; } = null!;
+    public List<string> Permissions { get; set; } = new();
 }
 
 public class CreateUserRequest
