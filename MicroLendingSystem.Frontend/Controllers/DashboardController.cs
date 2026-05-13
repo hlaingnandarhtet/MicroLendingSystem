@@ -14,7 +14,7 @@ public class DashboardController : Controller
     public DashboardController(IHttpClientFactory factory)
         => _http = factory.CreateClient("BackendApi");
 
-    public async Task<IActionResult> Index(CancellationToken ct)
+    public async Task<IActionResult> Index(int page = 1, int pageSize = 5, CancellationToken ct = default)
     {
         ViewData["Title"] = "Dashboard";
         ViewData["ActivePage"] = "Dashboard";
@@ -49,6 +49,20 @@ public class DashboardController : Controller
                     Label = m.Label,
                     Value = m.Value
                 }).ToList();
+                vm.StatusDistribution = summary.StatusDistribution;
+
+                if (!vm.ShowBorrowerDashboard)
+                {
+                    var pendingLoansUrl = $"api/loans?page={page}&pageSize={pageSize}&status=1";
+                    var pendingResult = await _http.GetFromJsonAsync<PagedPayload<Models.LoanDto>>(pendingLoansUrl, ct);
+                    if (pendingResult != null)
+                    {
+                        vm.PendingLoans = pendingResult.Items ?? new List<Models.LoanDto>();
+                        vm.PendingLoansTotalCount = pendingResult.TotalCount;
+                        vm.PendingLoansCurrentPage = pendingResult.CurrentPage;
+                        vm.PendingLoansPageSize = pendingResult.PageSize;
+                    }
+                }
             }
         }
         catch

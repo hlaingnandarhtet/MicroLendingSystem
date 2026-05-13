@@ -74,12 +74,28 @@ public sealed class DashboardService(AppDbContext context, ICurrentUserAccessor 
             });
         }
 
+        var statusGroups = await loans
+            .GroupBy(l => l.Status)
+            .Select(g => new { Status = g.Key, Count = g.Count() })
+            .ToListAsync(ct);
+
+        var statusDistribution = new Dictionary<string, int>();
+        foreach (var group in statusGroups)
+        {
+            var statusName = group.Status switch { 1 => "Pending", 2 => "Active", 3 => "Paid", 4 => "Overdue", _ => "Rejected" };
+            if (statusDistribution.ContainsKey(statusName))
+                statusDistribution[statusName] += group.Count;
+            else
+                statusDistribution[statusName] = group.Count;
+        }
+
         var dto = new DashboardSummaryDto
         {
             ActiveLoansCount = activeLoansCount,
             TotalBorrowersCount = totalBorrowersCount,
             RecentLoans = recentLoans,
-            MonthlyData = monthlyData
+            MonthlyData = monthlyData,
+            StatusDistribution = statusDistribution
         };
 
         if (_currentUser.IsBorrower && _currentUser.UserId is int borrowerUid)
@@ -100,7 +116,7 @@ public sealed class DashboardService(AppDbContext context, ICurrentUserAccessor 
                 join l in myLoans on t.LoanId equals l.Id
                 where t.IsDeleted != true
                       && t.TransactionType == TxRepayment
-                      && t.PaymentStatus == (int)PaymentStatus.Completed
+                      && t.PaymentStatus == (int)PaymentStatus.Paid
                 select t.Amount).SumAsync(ct);
 
             dto.RemainingBalance = await myLoans
@@ -134,7 +150,7 @@ public sealed class DashboardService(AppDbContext context, ICurrentUserAccessor 
             join l in financeLoans on t.LoanId equals l.Id
             where t.IsDeleted != true
                   && t.TransactionType == TxRepayment
-                  && t.PaymentStatus == (int)PaymentStatus.Completed
+                  && t.PaymentStatus == (int)PaymentStatus.Paid
                   && t.TransactionDate >= monthStart
             select t.Amount).SumAsync(ct);
 

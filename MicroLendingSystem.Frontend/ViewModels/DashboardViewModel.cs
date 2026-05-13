@@ -15,6 +15,12 @@ public class DashboardViewModel
 
     public List<ChartDataPoint> MonthlyData { get; set; } = new();
     public List<RecentLoanItem> RecentLoans { get; set; } = new();
+    public Dictionary<string, int> StatusDistribution { get; set; } = new();
+
+    public List<Models.LoanDto> PendingLoans { get; set; } = new();
+    public int PendingLoansTotalCount { get; set; }
+    public int PendingLoansCurrentPage { get; set; }
+    public int PendingLoansPageSize { get; set; }
 }
 
 public class ChartDataPoint

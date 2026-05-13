@@ -15,6 +15,7 @@ public sealed class DashboardSummaryDto
     public decimal AccruedInterest { get; set; }
     public List<DashboardRecentLoanDto> RecentLoans { get; set; } = new();
     public List<DashboardChartPointDto> MonthlyData { get; set; } = new();
+    public Dictionary<string, int> StatusDistribution { get; set; } = new();
 }
 
 public sealed class DashboardRecentLoanDto

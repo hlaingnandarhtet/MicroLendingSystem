@@ -91,7 +91,7 @@ public class UpdateLoanSettingRequest
 }
 
 // ── Loans ─────────────────────────────────────────────────────
-public enum LoanStatus { Pending = 1, Active = 2, Complete = 3, Overdue = 4, Rejected = 5 }
+public enum LoanStatus { Pending = 1, Active = 2, Paid = 3, Overdue = 4, Rejected = 5 }
 
 public class TransactionDto
 {
@@ -184,6 +184,7 @@ public sealed class DashboardSummaryDto
     public decimal AccruedInterest { get; set; }
     public List<DashboardRecentLoanDto> RecentLoans { get; set; } = new();
     public List<DashboardChartPointDto> MonthlyData { get; set; } = new();
+    public Dictionary<string, int> StatusDistribution { get; set; } = new();
 }
 
 public sealed class DashboardRecentLoanDto
